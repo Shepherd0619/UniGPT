@@ -134,8 +134,25 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
     /// <param name="msg">The message payload</param>
     public void OnAuthResponseMessage(AuthResponseMessage msg)
     {
-        // Authentication has been accepted
-        ClientAccept();
+        if (msg.requestResponseCode == AuthResponseMessage.Status.Success)
+        {
+            // Authentication has been accepted
+            ClientAccept();
+            LoginWindow.Instance.HideLoginScreen();
+        }
+        else
+        {
+
+            // Authentication has been rejected
+            // StopHost works for both host client and remote clients
+            NetworkManager.singleton.StopHost();
+            LoginWindow.Instance.ShowLoginScreen(false);
+
+            // Do this AFTER StopHost so it doesn't get cleared / hidden by OnClientDisconnect
+            MsgBoxManager.Instance.ShowMsgBox("Server has rejected your connection with a response.\n\n"+msg.requestResponseMessage, true);
+        }
+
+        Debug.Log($"Authentication Response: {msg.requestResponseCode} {msg.requestResponseMessage}");
     }
 
     /// <summary>

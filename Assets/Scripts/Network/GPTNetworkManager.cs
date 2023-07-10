@@ -38,6 +38,7 @@ public class GPTNetworkManager : NetworkManager
     public override void Start()
     {
         base.Start();
+        LoginWindow.Instance.ShowLoginScreen(true);
     }
 
     /// <summary>
