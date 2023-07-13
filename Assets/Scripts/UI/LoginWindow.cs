@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Networking;
+using Newtonsoft.Json;
+
 public class LoginWindow : MonoBehaviour
 {
     public static LoginWindow Instance;
@@ -49,5 +52,34 @@ public class LoginWindow : MonoBehaviour
     {
         Splashscreen.SetActive(false);
         LoginScreen.SetActive(false);
+    }
+
+    public void OnChangeAvatarBtnClicked(){
+        FileOpenDialog.Instance.OpenFileDialog(OnAvatarOpened);
+    }
+
+    public void OnAvatarOpened(string info)
+    {
+        FileOpenDialog.FileInfo result = JsonConvert.DeserializeObject<FileOpenDialog.FileInfo>(info);
+        Debug.Log("Selected File: " + result.Filename + ", path: " + result.Path);
+        StartCoroutine(LoadData(result.Path));
+    }
+
+    IEnumerator LoadData (string url) {
+        UnityWebRequest request = UnityWebRequest.Get(url);
+        DownloadHandlerBuffer handler = new DownloadHandlerBuffer();
+        request.downloadHandler = handler;
+        yield return request.SendWebRequest();
+
+        if (request.result != UnityWebRequest.Result.Success)
+        {
+            Debug.Log(request.error);
+            yield break;
+        }
+        Debug.Log("File loaded! "+url);
+        byte[] data = handler.data;
+
+        // 根据需要进行处理 data 的操作
+
     }
 }
