@@ -6,13 +6,16 @@ using System.IO;
 using System.Collections;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using System.Runtime.InteropServices;
 
 public class FileOpenDialog : MonoBehaviour
 {
+    [DllImport("__Internal")]
+    private static extern void ImageUploaderCaptureClick();
     public static FileOpenDialog Instance;
-#if !UNITY_EDITOR && UNITY_WEBGL
-    private Action<string> onFileSelected;
-#endif
+
+    public Action<string> onFileSelected;
+
 
     private void Awake()
     {
@@ -50,21 +53,7 @@ public class FileOpenDialog : MonoBehaviour
         Application.ExternalEval(@"
             document.getElementById('upload').click();
         ");
-#elif UNITY_ANDROID || UNITY_IOS
-        // 在移动端通过原生插件来打开文件选择对话框
-        NativeGallery.Permission permission = NativeGallery.GetFileFromGallery((path) =>
-        {
-            if (!string.IsNullOrEmpty(path))
-            {
-                FileInfo info = new FileInfo();
-                info.Path = path;
-                info.Filename = Path.GetFileName(path);
-                onFileSelected?.Invoke(JsonConvert.SerializeObject(info));
-            }
-        }, "Select File");
 #endif
-    }
-
     /*
         OpenFileDialog((filePath) =>
         {
@@ -72,13 +61,16 @@ public class FileOpenDialog : MonoBehaviour
             Debug.Log("Selected File: " + filePath);
         });
     */
-
+    }
     // 在文件选择对话框中选择完成后的回调函数
     public void OnFileSelected(string info)
     {
+        /*
         FileInfo result = JsonConvert.DeserializeObject<FileInfo>(info);
         Debug.Log("Selected File: " + result.Filename + ", path: " + result.Path);
         StartCoroutine(LoadData(result.Path));
+        */
+        onFileSelected?.Invoke(info);
     }
 
     IEnumerator LoadData(string url)

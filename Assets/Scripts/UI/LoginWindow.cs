@@ -14,6 +14,7 @@ public class LoginWindow : MonoBehaviour
     public TMP_InputField ServerAddress;
     public TMP_InputField Port;
     public TMP_InputField Username;
+    public Image Avatar;
 
     private void Awake()
     {
@@ -54,7 +55,8 @@ public class LoginWindow : MonoBehaviour
         LoginScreen.SetActive(false);
     }
 
-    public void OnChangeAvatarBtnClicked(){
+    public void OnChangeAvatarBtnClicked()
+    {
         FileOpenDialog.Instance.OpenFileDialog(OnAvatarOpened);
     }
 
@@ -65,10 +67,9 @@ public class LoginWindow : MonoBehaviour
         StartCoroutine(LoadData(result.Path));
     }
 
-    IEnumerator LoadData (string url) {
+    IEnumerator LoadData(string url)
+    {
         UnityWebRequest request = UnityWebRequest.Get(url);
-        DownloadHandlerBuffer handler = new DownloadHandlerBuffer();
-        request.downloadHandler = handler;
         yield return request.SendWebRequest();
 
         if (request.result != UnityWebRequest.Result.Success)
@@ -76,10 +77,17 @@ public class LoginWindow : MonoBehaviour
             Debug.Log(request.error);
             yield break;
         }
-        Debug.Log("File loaded! "+url);
-        byte[] data = handler.data;
+        Debug.Log("File loaded! " + url);
 
-        // 根据需要进行处理 data 的操作
+        Texture2D texture = new Texture2D(1, 1);
+        texture.LoadImage(request.downloadHandler.data);
+        Debug.Log("LoadImage complete!");
+        int width = texture.width;
+        int height = texture.height;
 
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, width, height), Vector2.zero);
+        ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).ClientInfo.Avatar = sprite;
+        Avatar.sprite = sprite;
+        Debug.Log("Avatar updated!");
     }
 }
