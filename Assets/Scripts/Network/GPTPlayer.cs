@@ -9,10 +9,14 @@ public class GPTPlayer : NetworkBehaviour
     public string PlayerName;
     [SyncVar]
     public Sprite Avatar;
+    [SyncVar]
+    public GPTNetworkAuthenticator.AuthRequestMessage.Role UserRole;
 
     public override void OnStartServer()
     {
-        PlayerName = (string)connectionToClient.authenticationData;
+        PlayerName = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Username;
+        Avatar = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Avatar;
+        UserRole = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).UserRole;
     }
 
     public override void OnStartLocalPlayer()

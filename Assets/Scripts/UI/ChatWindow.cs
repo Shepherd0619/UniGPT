@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-public class ChatWindow : MonoBehaviour
+using Mirror;
+public class ChatWindow : NetworkBehaviour
 {
     public static ChatWindow Instance;
     public ScrollRect ChatContainer;
@@ -39,5 +40,21 @@ public class ChatWindow : MonoBehaviour
 
     public void SetLocalPlayerInfo(GPTPlayer player){
         LocalPlayerAvatar.sprite = player.Avatar;
+    }
+
+    public void AppendMessage(GPTPlayer sender, string content){
+        GameObject obj = Instantiate(ChatMessagePrefab,ChatContainer.content);
+        MessageUI msg = obj.GetComponent<MessageUI>();
+
+        //更新信息框UI
+        msg.AppendMessage(sender.PlayerName,sender.Avatar,content);
+    }
+
+    [ClientRpc]
+    //<summary>
+    //服务器向客户端广播信息
+    //</summary>
+    public void OnReceiveServerMessage(){
+
     }
 }

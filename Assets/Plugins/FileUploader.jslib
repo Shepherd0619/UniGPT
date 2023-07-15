@@ -9,7 +9,7 @@ var ImageUploaderPlugin = {
         this.value = null;
       };
       fileInput.onchange = function (event) {
-        SendMessage('Canvas', 'FileSelected', URL.createObjectURL(event.target.files[0]));
+        SendMessage('FileOpenDialog', 'OnFileSelected', URL.createObjectURL(event.target.files[0]));
       }
       document.body.appendChild(fileInput);
     }

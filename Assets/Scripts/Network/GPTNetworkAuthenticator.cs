@@ -20,6 +20,14 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
     {
         public string Username;
         public Sprite Avatar;
+        public Role UserRole;
+        //TODO: 以后要加一个Guest身份，只能看信息，不能发送。
+        public enum Role
+        {
+            User,
+            Moderator,
+            Admin
+        }
     }
 
     public struct AuthResponseMessage : NetworkMessage
@@ -62,26 +70,57 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
     public void OnAuthRequestMessage(NetworkConnectionToClient conn, AuthRequestMessage msg)
     {
         if (connectionsPendingDisconnect.Contains(conn)) return;
+        AuthResponseMessage authResponseMessage = new AuthResponseMessage();
         // 在这里验证客户端信息
         if (string.IsNullOrEmpty(msg.Username) && string.IsNullOrWhiteSpace(msg.Username))
         {
-            AuthResponseMessage authResponseMessage = new AuthResponseMessage();
             authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Error;
             authResponseMessage.requestResponseMessage = "Invalid Username.";
             conn.Send(authResponseMessage);
             conn.isAuthenticated = false;
             connectionsPendingDisconnect.Add(conn);
             StartCoroutine(DelayedDisconnect(conn, 1f));
+            return;
         }
         else
         {
-            AuthResponseMessage authResponseMessage = new AuthResponseMessage();
 
-            conn.Send(authResponseMessage);
+            if (msg.UserRole == AuthRequestMessage.Role.Admin)
+            {
+                if (conn.address == GPTNetworkManager.singleton.networkAddress)
+                {
+                    //目前Admin只能为本机用户，Moderator可以后设置。
+                    Debug.Log("[GPTNetworkAuthenticator]Admin has connected to the server!");
+                    authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Success;
+                    conn.Send(authResponseMessage);
 
-            // Accept the successful authentication
-            ServerAccept(conn);
+                    // Accept the successful authentication
+                    ServerAccept(conn);
+                }
+                else
+                {
+                    authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Error;
+                    authResponseMessage.requestResponseMessage = "Illegal Admin";
+                    conn.Send(authResponseMessage);
+                    conn.isAuthenticated = false;
+                    connectionsPendingDisconnect.Add(conn);
+                    StartCoroutine(DelayedDisconnect(conn, 1f));
+                    return;
+                }
+            }
+            else
+            {
+                authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Success;
+                conn.Send(authResponseMessage);
+
+                // Accept the successful authentication
+                ServerAccept(conn);
+            }
+
+
         }
+
+
     }
 
     IEnumerator DelayedDisconnect(NetworkConnectionToClient conn, float waitTime)
@@ -149,7 +188,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             LoginWindow.Instance.ShowLoginScreen(false);
 
             // Do this AFTER StopHost so it doesn't get cleared / hidden by OnClientDisconnect
-            MsgBoxManager.Instance.ShowMsgBox("Server has rejected your connection with a response.\n\n"+msg.requestResponseMessage, true);
+            MsgBoxManager.Instance.ShowMsgBox("Server has rejected your connection with a response.\n\n" + msg.requestResponseMessage, true);
         }
 
         Debug.Log($"Authentication Response: {msg.requestResponseCode} {msg.requestResponseMessage}");
