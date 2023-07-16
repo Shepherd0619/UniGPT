@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
+using System.Linq;
 public class ChatWindow : NetworkBehaviour
 {
     public static ChatWindow Instance;
@@ -58,11 +59,11 @@ public class ChatWindow : NetworkBehaviour
     public void OnReceiveServerMessage(GPTChatMessage msg){
         if(msg.Sender == null){
             //系统信息
-            msg.Sender.PlayerName = "SYSTEM";
+            msg.Sender.Username = "SYSTEM";
             msg.Sender.Avatar = UIAssetsManager.Instance.GetIcon("announcement_icon");
         }
 
-        AppendMessage(msg.Sender.PlayerName,msg.Sender.Avatar,msg.content);
+        AppendMessage(msg.Sender.Username,msg.Sender.Avatar,msg.content);
 
     }
 
@@ -70,17 +71,27 @@ public class ChatWindow : NetworkBehaviour
     //<summary>
     //服务器向指定客户端广播信息
     //</summary>
-    public void OnReceiveServerTargetedMessage(GPTChatMessage msg){
-        if(msg.Receiver == null || msg.Receiver != LocalPlayer){
-            //没有收件人
-            Debug.Log("[ChatWindow]"+msg.Sender.PlayerName+" sent a invalid message since there is no receiver info or receiver is not us.");
-            return;
-        }
-
+    public void OnReceiveServerTargetedMessage(NetworkConnection Target, GPTChatMessage msg){
+        AppendMessage(msg.Sender.Username,msg.Sender.Avatar,msg.content);
     }
 
     [Command(requiresAuthority = false)]
     public void SendMessageToServer(GPTChatMessage msg){
-
+        if(msg.Receiver == null){
+            OnReceiveServerMessage(msg);
+        }else{
+            if(msg.Sender != null){
+                GPTNetworkAuthenticator.AuthRequestMessage search= new GPTNetworkAuthenticator.AuthRequestMessage();
+                search.Username = msg.Receiver.Username;
+                search.Avatar = msg.Receiver.Avatar;
+                search.UserRole = msg.Receiver.UserRole;
+                if(((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search)){
+                    NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
+                    //TODO: 这里应该调用OpenAI的接口，获取回复，然后发给客户端。
+                    OnReceiveServerTargetedMessage(conn, msg);
+                }
+            }
+            
+        }
     }
 }

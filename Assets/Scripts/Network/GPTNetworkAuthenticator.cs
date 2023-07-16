@@ -12,6 +12,7 @@ using UnityEngine.UI;
 public class GPTNetworkAuthenticator : NetworkAuthenticator
 {
     readonly HashSet<NetworkConnection> connectionsPendingDisconnect = new HashSet<NetworkConnection>();
+    public readonly Dictionary<NetworkConnection, AuthRequestMessage> UsersList = new Dictionary<NetworkConnection, AuthRequestMessage>();
     // 客户端信息（如用户名、头像等），后续可以定制一下，比如增加用户名密码验证。
     public AuthRequestMessage ClientInfo;
 
@@ -96,6 +97,9 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
 
                     // Accept the successful authentication
                     ServerAccept(conn);
+
+                    UsersList.Add(conn, msg);
+                    Debug.Log("[GPTNetworkAuthenticator]Statistics of online users:" + UsersList.Count);
                 }
                 else
                 {
@@ -115,6 +119,10 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
 
                 // Accept the successful authentication
                 ServerAccept(conn);
+
+                UsersList.Add(conn, msg);
+                Debug.Log("{GPTNetworkAuthenticator]"+msg.Username+" ("+conn.address+") has joined the server.");
+                Debug.Log("[GPTNetworkAuthenticator]Statistics of online users:" + UsersList.Count);
             }
 
 

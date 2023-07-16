@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class GPTPlayer : NetworkBehaviour
 {
     [SyncVar]
-    public string PlayerName;
+    public string Username;
     [SyncVar]
     public Sprite Avatar;
     [SyncVar]
@@ -14,7 +14,7 @@ public class GPTPlayer : NetworkBehaviour
 
     public override void OnStartServer()
     {
-        PlayerName = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Username;
+        Username = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Username;
         Avatar = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Avatar;
         UserRole = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).UserRole;
     }
