@@ -3539,7 +3539,7 @@ MonoBehaviour:
   Username: {fileID: 1561399129}
   LoginAsClientBtn: {fileID: 503461323}
   LoginAsHostBtn: {fileID: 355930991}
-  Avatar: {fileID: 0}
+  Avatar: {fileID: 1281975606}
 --- !u!1 &1061497148
 GameObject:
   m_ObjectHideFlags: 0
@@ -4257,7 +4257,7 @@ MonoBehaviour:
   ChatContainer: {fileID: 1351122720}
   ChatMessagePrefab: {fileID: 9034106224001298501, guid: 3b4082d9b167fb44584c01d3b9c32ff0, type: 3}
   MessageInputField: {fileID: 714193169}
-  LocalPlayerAvatar: {fileID: 0}
+  LocalPlayerAvatar: {fileID: 302526187}
   LocalPlayer: {fileID: 0}
 --- !u!114 &1272184640
 MonoBehaviour:
