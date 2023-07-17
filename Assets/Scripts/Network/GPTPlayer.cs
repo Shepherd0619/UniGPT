@@ -7,15 +7,17 @@ public class GPTPlayer : NetworkBehaviour
 {
     [SyncVar]
     public string Username;
-    [SyncVar]
-    public Sprite Avatar;
+    public readonly SyncList<byte> Avatar = new SyncList<byte>();
     [SyncVar]
     public GPTNetworkAuthenticator.AuthRequestMessage.Role UserRole;
 
     public override void OnStartServer()
     {
         Username = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Username;
-        Avatar = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Avatar;
+        Avatar.Clear();
+        foreach(byte data in ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Avatar){
+            Avatar.Add(data);
+        }
         UserRole = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).UserRole;
     }
 

@@ -20,7 +20,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
     public struct AuthRequestMessage : NetworkMessage
     {
         public string Username;
-        public Sprite Avatar;
+        public byte[] Avatar;
         public Role UserRole;
         //TODO: 以后要加一个Guest身份，只能看信息，不能发送。
         public enum Role
@@ -87,7 +87,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
         if (connectionsPendingDisconnect.Contains(conn)) return;
         AuthResponseMessage authResponseMessage = new AuthResponseMessage();
         // 在这里验证客户端信息
-        if (string.IsNullOrEmpty(msg.Username) && string.IsNullOrWhiteSpace(msg.Username))
+        if (string.IsNullOrWhiteSpace(msg.Username))
         {
             authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Error;
             authResponseMessage.requestResponseMessage = "Invalid Username.";
@@ -137,6 +137,8 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                 UsersList.Add(conn, msg);
                 Debug.Log("{GPTNetworkAuthenticator]"+msg.Username+" ("+conn.address+") has joined the server.");
                 Debug.Log("[GPTNetworkAuthenticator]Statistics of online users:" + UsersList.Count);
+
+                ChatWindow.Instance.OnReceiveServerTargetedMessage(conn, new GPTChatMessage{ content = "Let's give "+msg.Username+" a really warm welcome! Hope you can enjoy your stay!" });
             }
 
 
@@ -209,6 +211,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             // Authentication has been accepted
             ClientAccept();
             LoginWindow.Instance.HideLoginScreen();
+            ChatWindow.Instance.ShowChatWindow();
         }
         else
         {

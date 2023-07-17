@@ -8,12 +8,12 @@ public class MsgBox : MonoBehaviour
     public GameObject confirmButton;
     public GameObject cancelButton;
     public GameObject maskPanel;
-    private GameObject msgBoxPanel;
 
     public Action<bool> callback; // 回调函数，用于返回用户的操作结果
 
     private void Awake() {
-        
+        confirmButton.GetComponent<Button>().onClick.AddListener(ConfirmButtonClicked);
+        cancelButton.GetComponent<Button>().onClick.AddListener(CancelButtonClicked);
     }
 
     // 显示信息框并获取用户的操作
@@ -29,7 +29,9 @@ public class MsgBox : MonoBehaviour
         cancelButton.SetActive(hasCancelButton);
 
         if(hasCancelButton){
-            confirmButton.transform.position = new Vector3(-170.0f, confirmButton.transform.position.y,confirmButton.transform.position.z);
+            confirmButton.transform.localPosition = new Vector3(-170.0f, confirmButton.transform.localPosition.y,confirmButton.transform.localPosition.z);
+        }else{
+            confirmButton.transform.localPosition = new Vector3(0.0f, confirmButton.transform.localPosition.y,confirmButton.transform.localPosition.z);
         }
 
         //保存回调函数
@@ -37,9 +39,6 @@ public class MsgBox : MonoBehaviour
 
         // 禁用其他UI，只允许与信息框互动
         maskPanel.SetActive(true);
-
-        // 显示信息框
-        msgBoxPanel.SetActive(true);
     }
 
     // 确认按钮点击事件
@@ -47,9 +46,6 @@ public class MsgBox : MonoBehaviour
     {
         // 执行确认操作
         // ...
-
-        // 关闭信息框
-        msgBoxPanel.SetActive(false);
 
         // 恢复其他UI的交互能力
         maskPanel.SetActive(false);
@@ -63,10 +59,7 @@ public class MsgBox : MonoBehaviour
     public void CancelButtonClicked()
     {
         // 执行取消操作
-        // ...
-
-        // 关闭信息框
-        msgBoxPanel.SetActive(false);
+        // ...  
 
         // 恢复其他UI的交互能力
         maskPanel.SetActive(false);

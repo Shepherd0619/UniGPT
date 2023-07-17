@@ -17,6 +17,7 @@ public class GPTNetworkManager : NetworkManager
     public bool isReconnecting = false;
     public int MaxReconnectAttempt = 5;
     private int CurrentReconnectAttemptCounter = 0;
+
     /// <summary>
     /// Runs on both Server and Client
     /// Networking is NOT initialized when this fires
@@ -41,7 +42,7 @@ public class GPTNetworkManager : NetworkManager
     public override void Start()
     {
         base.Start();
-        LoginWindow.Instance.ShowLoginScreen();
+        LoginWindow.Instance.ShowSplashScreen();
     }
 
     /// <summary>

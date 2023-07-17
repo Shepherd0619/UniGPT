@@ -12,7 +12,7 @@ public class ChatWindow : NetworkBehaviour
     public ScrollRect ChatContainer;
     public GameObject ChatMessagePrefab;
     public TMP_InputField MessageInputField;
-    public Image LocalPlayerAvatar;
+    public RawImage LocalPlayerAvatar;
     public GPTPlayer LocalPlayer;
 
     public readonly List<ChatRequestLog> chatRequestLogs = new List<ChatRequestLog>();
@@ -58,10 +58,10 @@ public class ChatWindow : NetworkBehaviour
 
     public void SetLocalPlayerInfo(GPTPlayer player)
     {
-        LocalPlayerAvatar.sprite = player.Avatar;
+        ImageConversion.LoadImage((Texture2D)LocalPlayerAvatar.texture, player.Avatar.ToArray());
     }
 
-    public void AppendMessage(string sender, Sprite avatar, string content)
+    public void AppendMessage(string sender, byte[] avatar, string content)
     {
         GameObject obj = Instantiate(ChatMessagePrefab, ChatContainer.content);
         MessageUI msg = obj.GetComponent<MessageUI>();
@@ -73,17 +73,20 @@ public class ChatWindow : NetworkBehaviour
     [ClientRpc]
     //<summary>
     //服务器向客户端广播信息
-    //</summary>
+    //</summary>    
     public void OnReceiveServerMessage(GPTChatMessage msg)
     {
         if (msg.Sender == null)
         {
             //系统信息
             msg.Sender.Username = "SYSTEM";
-            msg.Sender.Avatar = UIAssetsManager.Instance.GetIcon("announcement_icon");
+            msg.Sender.Avatar.Clear();
+            foreach(byte data in ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("announcement_icon"))){
+                msg.Sender.Avatar.Add(data);
+            }
         }
 
-        AppendMessage(msg.Sender.Username, msg.Sender.Avatar, msg.content);
+        AppendMessage(msg.Sender.Username, msg.Sender.Avatar.ToArray(), msg.content);
 
     }
 
@@ -93,13 +96,23 @@ public class ChatWindow : NetworkBehaviour
     //</summary>
     public void OnReceiveServerTargetedMessage(NetworkConnection Target, GPTChatMessage msg)
     {
-        AppendMessage(msg.Sender.Username, msg.Sender.Avatar, msg.content);
+        if (msg.Sender == null)
+        {
+            //系统信息
+            msg.Sender.Username = "SYSTEM";
+            msg.Sender.Avatar.Clear();
+            foreach(byte data in ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("announcement_icon"))){
+                msg.Sender.Avatar.Add(data);
+            }
+        }
+        
+        AppendMessage(msg.Sender.Username, msg.Sender.Avatar.ToArray(), msg.content);
     }
 
     [TargetRpc]
     public void OnReceiveChatGPTMessage(NetworkConnection conn, string content)
     {
-        AppendMessage("ChatGPT", UIAssetsManager.Instance.GetIcon("chatgpt_icon"), content);
+        AppendMessage("ChatGPT", ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("chatgpt_icon")), content);
     }
 
     [Command(requiresAuthority = false)]
@@ -115,7 +128,7 @@ public class ChatWindow : NetworkBehaviour
             {
                 GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
                 search.Username = msg.Receiver.Username;
-                search.Avatar = msg.Receiver.Avatar;
+                search.Avatar = msg.Receiver.Avatar.ToArray();
                 search.UserRole = msg.Receiver.UserRole;
                 if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
                 {
@@ -135,7 +148,7 @@ public class ChatWindow : NetworkBehaviour
         {
             GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
             search.Username = msg.Receiver.Username;
-            search.Avatar = msg.Receiver.Avatar;
+            search.Avatar = msg.Receiver.Avatar.ToArray();
             search.UserRole = msg.Receiver.UserRole;
             if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
             {
@@ -157,7 +170,7 @@ public class ChatWindow : NetworkBehaviour
     {
         GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
         search.Username = applicant.Username;
-        search.Avatar = applicant.Avatar;
+        search.Avatar = applicant.Avatar.ToArray();
         search.UserRole = applicant.UserRole;
         if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
         {

@@ -897,5 +897,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   contentText: {fileID: 6970305695670974371}
   confirmButton: {fileID: 6970305695979195180}
-  cancelButton: {fileID: 6970305695979195180}
-  maskPanel: {fileID: 6970305696535552077}
+  cancelButton: {fileID: 6970305696535552077}
+  maskPanel: {fileID: 6970305696621932182}

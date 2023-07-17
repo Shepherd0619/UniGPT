@@ -5,6 +5,8 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
+using System;
+using Mirror;
 
 public class LoginWindow : MonoBehaviour
 {
@@ -14,13 +16,23 @@ public class LoginWindow : MonoBehaviour
     public TMP_InputField ServerAddress;
     public TMP_InputField Port;
     public TMP_InputField Username;
-    public Image Avatar;
+    public Button LoginAsClientBtn;
+    public Button LoginAsHostBtn;
+    public RawImage Avatar;
 
     private void Awake()
     {
         Instance = this;
         LoginScreen.SetActive(false);
         Splashscreen.SetActive(false);
+
+        if (Application.platform == RuntimePlatform.WebGLPlayer)
+        {
+            LoginAsHostBtn.interactable = false;
+        }
+
+        LoginAsClientBtn.onClick.AddListener(LoginAsClient);
+        LoginAsHostBtn.onClick.AddListener(LoginAsHost);
     }
 
     // Start is called before the first frame update
@@ -80,20 +92,47 @@ public class LoginWindow : MonoBehaviour
         Texture2D texture = new Texture2D(1, 1);
         texture.LoadImage(request.downloadHandler.data);
         Debug.Log("LoadImage complete!");
-        int width = texture.width;
-        int height = texture.height;
 
-        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, width, height), Vector2.zero);
-        ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).ClientInfo.Avatar = sprite;
-        Avatar.sprite = sprite;
+        Avatar.texture = texture;
         Debug.Log("Avatar updated!");
     }
 
-    public void LoginAsClient(){
+    public void LoginAsClient()
+    {
+        if (String.IsNullOrWhiteSpace(ServerAddress.text))
+        {
+            MsgBoxManager.Instance.ShowMsgBox("Please fill in the Server Address.", false);
+            return;
+        }
 
+        if (String.IsNullOrWhiteSpace(Username.text))
+        {
+            MsgBoxManager.Instance.ShowMsgBox("Please fill in your Username.", false);
+            return;
+        }
+        SetAuthRequestMessage(false);
+        GPTNetworkManager.singleton.networkAddress = ServerAddress.text + (String.IsNullOrWhiteSpace(Port.text) ? ":7777" : ":" + Port.text);
+        GPTNetworkManager.singleton.StartClient();
     }
 
-    public void LoginAsServer(){
-        
+    public void LoginAsHost()
+    {
+        if (Application.platform == RuntimePlatform.WebGLPlayer)
+        {
+            MsgBoxManager.Instance.ShowMsgBox("Host is not available on WebGL version. \nIf you wish to be host or set up dedicated server, please move to standalone version.", false);
+            return;
+        }
+        SetAuthRequestMessage(true);
+        GPTNetworkManager.singleton.StartHost();
+    }
+
+    public void SetAuthRequestMessage(bool isAdmin)
+    {
+        ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).ClientInfo = new GPTNetworkAuthenticator.AuthRequestMessage()
+        {
+            Username = Username.text,
+            Avatar = Avatar.texture?ImageConversion.EncodeToPNG((Texture2D)Avatar.texture):ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("default-avatar")),
+            UserRole = isAdmin ? GPTNetworkAuthenticator.AuthRequestMessage.Role.Admin : GPTNetworkAuthenticator.AuthRequestMessage.Role.User
+        };
     }
 }

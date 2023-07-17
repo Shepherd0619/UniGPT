@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 public class MessageUI : MonoBehaviour
 {
-    public Image Avatar;
+    public RawImage Avatar;
     public string Name;
     public string Message;
     public ScrollRect messageScroll;
@@ -29,9 +29,9 @@ public class MessageUI : MonoBehaviour
 
     }
 
-    public void AppendMessage(string name, Sprite avatar, string message)
+    public void AppendMessage(string name, byte[] avatar, string message)
     {
-        Avatar.sprite = avatar;
+        ImageConversion.LoadImage((Texture2D)Avatar.texture,avatar);
         Name = name;
         Message = message;
     }
