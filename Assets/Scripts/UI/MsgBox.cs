@@ -29,7 +29,7 @@ public class MsgBox : MonoBehaviour
         cancelButton.SetActive(hasCancelButton);
 
         if(hasCancelButton){
-            confirmButton.transform.position = new Vector3(0.0f, confirmButton.transform.position.y,confirmButton.transform.position.z);
+            confirmButton.transform.position = new Vector3(-170.0f, confirmButton.transform.position.y,confirmButton.transform.position.z);
         }
 
         //保存回调函数

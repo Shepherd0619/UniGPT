@@ -4,28 +4,41 @@ using UnityEngine;
 using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
-
+using Mirror;
 public class ChatCompletion : MonoBehaviour
 {
     private const string API_URL = "https://api.openai.com/v1/chat/completions";
     public string OPENAI_API_KEY = "";
+    public static ChatCompletion Instance;
 
-    public void SendChatMessage()
+    private void Awake()
     {
-        StartCoroutine(ChatRequestCoroutine());
+        Instance = this;
     }
 
-    private IEnumerator ChatRequestCoroutine()
+    public Coroutine SendChatRequest(List<ChatMessage> history, string msg, NetworkConnection conn)
+    {
+        if (history != null || history.Count == 0)
+            history.Add(new ChatMessage() { role = "user", content = msg });
+        else
+        {
+            history = new List<ChatMessage>
+            {
+                new ChatMessage { role = "system", content = "You are a helpful assistant." },
+                new ChatMessage { role = "user", content = msg }
+            };
+        }
+        return StartCoroutine(ChatRequestCoroutine(history, conn));
+    }
+
+    private IEnumerator ChatRequestCoroutine(List<ChatMessage> msgs,
+        NetworkConnection conn)
     {
         // Prepare request data
         ChatRequest requestData = new ChatRequest
         {
             model = "gpt-3.5-turbo",
-            messages = new List<ChatMessage>
-            {
-                new ChatMessage { role = "system", content = "You are a helpful assistant." },
-                new ChatMessage { role = "user", content = "Hello!" }
-            }
+            messages = msgs
         };
 
         // Convert request data to JSON
@@ -33,20 +46,25 @@ public class ChatCompletion : MonoBehaviour
 
         // Create HTTP client and request headers
         HttpClient client = new HttpClient();
-        client.DefaultRequestHeaders.Add("Authorization",$"Bearer {OPENAI_API_KEY}");
+        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {OPENAI_API_KEY}");
         client.DefaultRequestHeaders.Add("Content-Type", "application/json");
 
         // Send POST request
         var response = client.PostAsync(API_URL, new StringContent(jsonRequestData, Encoding.UTF8, "application/json")).Result;
-        
+
         // Read response data
         string jsonResponseData = response.Content.ReadAsStringAsync().Result;
         ChatResponse responseData = JsonConvert.DeserializeObject<ChatResponse>(jsonResponseData);
 
         // Handle the response data
         // ...
-
+        ChatRequestResponseCallback(responseData, conn);
         yield return null;
+    }
+
+    public void ChatRequestResponseCallback(ChatResponse callback, NetworkConnection conn)
+    {
+        ChatWindow.Instance.OnReceiveChatGPTMessage(conn, callback.choices[0].message.content);
     }
 }
 

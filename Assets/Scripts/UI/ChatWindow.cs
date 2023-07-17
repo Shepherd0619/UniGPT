@@ -4,66 +4,86 @@ using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
 using System.Linq;
+using TMPro;
+
 public class ChatWindow : NetworkBehaviour
 {
     public static ChatWindow Instance;
     public ScrollRect ChatContainer;
     public GameObject ChatMessagePrefab;
+    public TMP_InputField MessageInputField;
     public Image LocalPlayerAvatar;
     public GPTPlayer LocalPlayer;
-    
-    private void Awake() {
+
+    public readonly List<ChatRequestLog> chatRequestLogs = new List<ChatRequestLog>();
+    public class ChatRequestLog
+    {
+        public List<ChatMessage> history;
+        public GPTPlayer sender;
+    }
+
+    public readonly Dictionary<NetworkConnection, Coroutine> chatRequestUnderProcessing = new Dictionary<NetworkConnection, Coroutine>();
+
+    private void Awake()
+    {
         Instance = this;
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    public void ShowChatWindow(){
+    public void ShowChatWindow()
+    {
         gameObject.SetActive(true);
     }
 
-    public void HideChatWindow(){
+    public void HideChatWindow()
+    {
         gameObject.SetActive(false);
     }
 
-    public void Init(){
+    public void Init()
+    {
 
     }
 
-    public void SetLocalPlayerInfo(GPTPlayer player){
+    public void SetLocalPlayerInfo(GPTPlayer player)
+    {
         LocalPlayerAvatar.sprite = player.Avatar;
     }
 
-    public void AppendMessage(string sender, Sprite avatar, string content){
-        GameObject obj = Instantiate(ChatMessagePrefab,ChatContainer.content);
+    public void AppendMessage(string sender, Sprite avatar, string content)
+    {
+        GameObject obj = Instantiate(ChatMessagePrefab, ChatContainer.content);
         MessageUI msg = obj.GetComponent<MessageUI>();
 
         //更新信息框UI
-        msg.AppendMessage(sender,avatar,content);
+        msg.AppendMessage(sender, avatar, content);
     }
 
     [ClientRpc]
     //<summary>
     //服务器向客户端广播信息
     //</summary>
-    public void OnReceiveServerMessage(GPTChatMessage msg){
-        if(msg.Sender == null){
+    public void OnReceiveServerMessage(GPTChatMessage msg)
+    {
+        if (msg.Sender == null)
+        {
             //系统信息
             msg.Sender.Username = "SYSTEM";
             msg.Sender.Avatar = UIAssetsManager.Instance.GetIcon("announcement_icon");
         }
 
-        AppendMessage(msg.Sender.Username,msg.Sender.Avatar,msg.content);
+        AppendMessage(msg.Sender.Username, msg.Sender.Avatar, msg.content);
 
     }
 
@@ -71,27 +91,80 @@ public class ChatWindow : NetworkBehaviour
     //<summary>
     //服务器向指定客户端广播信息
     //</summary>
-    public void OnReceiveServerTargetedMessage(NetworkConnection Target, GPTChatMessage msg){
-        AppendMessage(msg.Sender.Username,msg.Sender.Avatar,msg.content);
+    public void OnReceiveServerTargetedMessage(NetworkConnection Target, GPTChatMessage msg)
+    {
+        AppendMessage(msg.Sender.Username, msg.Sender.Avatar, msg.content);
+    }
+
+    [TargetRpc]
+    public void OnReceiveChatGPTMessage(NetworkConnection conn, string content)
+    {
+        AppendMessage("ChatGPT", UIAssetsManager.Instance.GetIcon("chatgpt_icon"), content);
     }
 
     [Command(requiresAuthority = false)]
-    public void SendMessageToServer(GPTChatMessage msg){
-        if(msg.Receiver == null){
+    public void SendMessageToServer(GPTChatMessage msg)
+    {
+        if (msg.Receiver == null)
+        {
             OnReceiveServerMessage(msg);
-        }else{
-            if(msg.Sender != null){
-                GPTNetworkAuthenticator.AuthRequestMessage search= new GPTNetworkAuthenticator.AuthRequestMessage();
+        }
+        else
+        {
+            if (msg.Sender != null)
+            {
+                GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
                 search.Username = msg.Receiver.Username;
                 search.Avatar = msg.Receiver.Avatar;
                 search.UserRole = msg.Receiver.UserRole;
-                if(((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search)){
+                if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
+                {
                     NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
-                    //TODO: 这里应该调用OpenAI的接口，获取回复，然后发给客户端。
+
                     OnReceiveServerTargetedMessage(conn, msg);
                 }
             }
-            
+
         }
     }
+
+    [Command(requiresAuthority = false)]
+    public void SendMessageToChatGPT(GPTChatMessage msg)
+    {
+        if (msg.Sender != null)
+        {
+            GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
+            search.Username = msg.Receiver.Username;
+            search.Avatar = msg.Receiver.Avatar;
+            search.UserRole = msg.Receiver.UserRole;
+            if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
+            {
+                NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
+
+                ChatRequestLog result = chatRequestLogs.First(x => (x.sender == msg.Sender));
+                if (result != null)
+                {
+                    chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(result.history, msg.content, conn));
+                }
+            }
+        }
+
+
+    }
+
+    [Command(requiresAuthority = false)]
+    public void StopChatGPTProcessing(GPTPlayer applicant)
+    {
+        GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
+        search.Username = applicant.Username;
+        search.Avatar = applicant.Avatar;
+        search.UserRole = applicant.UserRole;
+        if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
+        {
+            NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
+            Coroutine result =  chatRequestUnderProcessing.First(x => x.Key == conn).Value;
+            StopCoroutine(result);
+        }
+    }
+
 }

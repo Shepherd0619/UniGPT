@@ -26,10 +26,10 @@ public class MsgBoxManager : MonoBehaviour
         
     }
 
-    public void ShowMsgBox(string content, bool hasConfirmButton, Action<bool> result = null){
+    public void ShowMsgBox(string content, bool hasCancelButton, Action<bool> result = null){
         GameObject prefab = Instantiate(Prefab, GameObject.FindObjectOfType<Canvas>().transform);
         MsgBox msgBox = prefab.GetComponent<MsgBox>();
-        msgBox.ShowMsgBox(content,hasConfirmButton,result);
+        msgBox.ShowMsgBox(content,hasCancelButton,result);
         MsgBoxes.Add(msgBox);
     }
 

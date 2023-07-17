@@ -4158,7 +4158,9 @@ MonoBehaviour:
   syncInterval: 0
   ChatContainer: {fileID: 1351122720}
   ChatMessagePrefab: {fileID: 9034106224001298501, guid: 3b4082d9b167fb44584c01d3b9c32ff0, type: 3}
-  LocalPlayerAvatar: {fileID: 0}
+  MessageInputField: {fileID: 714193169}
+  LocalPlayerAvatar: {fileID: 302526185}
+  LocalPlayer: {fileID: 0}
 --- !u!114 &1272184640
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5420,6 +5422,9 @@ MonoBehaviour:
     dynamicAdjustmentTolerance: 1
     deliveryTimeEmaDuration: 2
   timeInterpolationGui: 0
+  ActionOnDisconnect:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1504986197
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
+using System.Collections;
 
 /*
 	Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -13,7 +14,9 @@ public class GPTNetworkManager : NetworkManager
     // Overrides the base singleton so we don't
     // have to cast to this type everywhere.
     public static new GPTNetworkManager singleton { get; private set; }
-
+    public bool isReconnecting = false;
+    public int MaxReconnectAttempt = 5;
+    private int CurrentReconnectAttemptCounter = 0;
     /// <summary>
     /// Runs on both Server and Client
     /// Networking is NOT initialized when this fires
@@ -38,7 +41,7 @@ public class GPTNetworkManager : NetworkManager
     public override void Start()
     {
         base.Start();
-        LoginWindow.Instance.ShowLoginScreen(true);
+        LoginWindow.Instance.ShowLoginScreen();
     }
 
     /// <summary>
@@ -184,13 +187,20 @@ public class GPTNetworkManager : NetworkManager
     public override void OnClientConnect()
     {
         base.OnClientConnect();
+        if (isReconnecting)
+        {
+            isReconnecting = false;
+        }
     }
 
     /// <summary>
     /// Called on clients when disconnected from a server.
     /// <para>This is called on the client when it disconnects from the server. Override this function to decide what happens when the client disconnects.</para>
     /// </summary>
-    public override void OnClientDisconnect() { }
+    public override void OnClientDisconnect()
+    {
+        LoginWindow.Instance.ShowLoginScreen();
+    }
 
     /// <summary>
     /// Called on clients when a servers tells the client it is no longer ready.
@@ -203,7 +213,36 @@ public class GPTNetworkManager : NetworkManager
     /// </summary>
     /// <param name="transportError">TransportError enum.</param>
     /// <param name="message">String message of the error.</param>
-    public override void OnClientError(TransportError transportError, string message) { }
+    public override void OnClientError(TransportError transportError, string message)
+    {
+        if (transportError == TransportError.Timeout)
+        {
+            Debug.LogError("[GPTNetworkAuthenticator]Client Error!" + "Reason: ping timeout or dead link");
+            if (!isReconnecting)
+            {
+                CurrentReconnectAttemptCounter = 0;
+                NetworkClient.Connect(networkAddress);
+                CurrentReconnectAttemptCounter++;
+                Debug.Log("[GPTNetworkAuthenticatior]Client is now reconnecting. (" + CurrentReconnectAttemptCounter + " of " + MaxReconnectAttempt + ")");
+            }
+            else
+            {
+                if (CurrentReconnectAttemptCounter < MaxReconnectAttempt)
+                {
+                    NetworkClient.Connect(networkAddress);
+                    CurrentReconnectAttemptCounter++;
+                    Debug.Log("[GPTNetworkAuthenticatior]Client is now reconnecting. (" + CurrentReconnectAttemptCounter + " of " + MaxReconnectAttempt + ")");
+                }else{
+                    isReconnecting = false;
+                    Debug.Log("[GPTNetworkAuthenticator]MaxReconnectAttempt reached! Reconnect failed!");
+                    CurrentReconnectAttemptCounter = 0;
+                    MsgBoxManager.Instance.ShowMsgBox("We are sorry to inform you that we have lost the connection to the server due to <b>ping timeout or dead link</b>.\nWe will send ya back to the login screen.",false,(result) => {
+                        LoginWindow.Instance.ShowLoginScreen();
+                    });
+                }
+            }
+        }
+    }
 
     #endregion
 

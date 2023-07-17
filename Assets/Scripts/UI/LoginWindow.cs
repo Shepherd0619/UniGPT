@@ -35,18 +35,16 @@ public class LoginWindow : MonoBehaviour
 
     }
 
-    public void ShowLoginScreen(bool needSplash)
+    public void ShowSplashScreen()
     {
-        if (needSplash)
-        {
-            Splashscreen.SetActive(true);
-            LoginScreen.SetActive(false);
-        }
-        else
-        {
-            Splashscreen.SetActive(false);
-            LoginScreen.SetActive(true);
-        }
+        Splashscreen.SetActive(true);
+        LoginScreen.SetActive(false);
+    }
+
+    public void ShowLoginScreen()
+    {
+        Splashscreen.SetActive(false);
+        LoginScreen.SetActive(true);
     }
 
     public void HideLoginScreen()
@@ -89,5 +87,13 @@ public class LoginWindow : MonoBehaviour
         ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).ClientInfo.Avatar = sprite;
         Avatar.sprite = sprite;
         Debug.Log("Avatar updated!");
+    }
+
+    public void LoginAsClient(){
+
+    }
+
+    public void LoginAsServer(){
+        
     }
 }

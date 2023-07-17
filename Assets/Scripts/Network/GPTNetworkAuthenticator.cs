@@ -43,6 +43,20 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
         public string requestResponseMessage;
     }
 
+    public struct KickPlayerMessage : NetworkMessage{
+        public ReasonID Reason;
+        public enum ReasonID{
+            None,
+            Violation,
+            ServerError,
+            ClientError,
+            Ping,
+            BanInProgress,
+            Other
+        }
+        public string Message;
+    }
+
     #endregion
 
     #region Server
@@ -143,6 +157,14 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
         connectionsPendingDisconnect.Remove(conn);
     }
 
+    //<summary>
+    //服务器踢出用户
+    //</summary>
+    public void KickPlayer(NetworkConnectionToClient conn, string msg, KickPlayerMessage.ReasonID reason = KickPlayerMessage.ReasonID.None){
+        conn.Send(new KickPlayerMessage(){ Reason = reason, Message =  msg });
+        StartCoroutine(DelayedDisconnect(conn, 1f));
+    }
+
     /// <summary>
     /// Called when server stops, used to unregister message handlers if needed.
     /// </summary>
@@ -164,6 +186,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
     {
         // register a handler for the authentication response we expect from server
         NetworkClient.RegisterHandler<AuthResponseMessage>(OnAuthResponseMessage, false);
+        NetworkClient.RegisterHandler<KickPlayerMessage>(OnKickPlayerMessage, false);
     }
 
     /// <summary>
@@ -193,13 +216,47 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             // Authentication has been rejected
             // StopHost works for both host client and remote clients
             NetworkManager.singleton.StopHost();
-            LoginWindow.Instance.ShowLoginScreen(false);
+            LoginWindow.Instance.ShowLoginScreen();
 
             // Do this AFTER StopHost so it doesn't get cleared / hidden by OnClientDisconnect
             MsgBoxManager.Instance.ShowMsgBox("Server has rejected your connection with a response.\n\n" + msg.requestResponseMessage, true);
         }
 
         Debug.Log($"Authentication Response: {msg.requestResponseCode} {msg.requestResponseMessage}");
+    }
+
+    //<summary>
+    //客户端接收到踢出信息时要做出的反应
+    //不建议在这里头用客户端那头的断开连接函数，可能会有意料之外的情况。
+    //</summary>
+    public void OnKickPlayerMessage(KickPlayerMessage msg){
+        string MsgBoxText = "You have been removed from the server due to\n";
+        switch (msg.Reason)
+        {
+            case KickPlayerMessage.ReasonID.BanInProgress:
+                MsgBoxText += "<b>Account Ban In Progress.</b>";
+                break;
+            case KickPlayerMessage.ReasonID.Violation:
+                MsgBoxText += "<b>Violation Of Server Rules</b>";
+                break;
+            case KickPlayerMessage.ReasonID.ServerError:
+                MsgBoxText += "<b>Server Internal Error</b>";
+                break;
+            case KickPlayerMessage.ReasonID.ClientError:
+                MsgBoxText += "<b>Client Internal Error</b>";
+                break;
+            case KickPlayerMessage.ReasonID.Ping:
+                MsgBoxText += "<b>Unstable Network</b>";
+                break;
+            case KickPlayerMessage.ReasonID.None:
+                MsgBoxText = "You have been removed from the server.";
+                break;
+        }
+
+        if(!String.IsNullOrEmpty(msg.Message) && !String.IsNullOrWhiteSpace(msg.Message))
+            MsgBoxText += "\nPlease refer to the following detailed message: " + msg.Message;
+        
+        MsgBoxManager.Instance.ShowMsgBox(MsgBoxText, true);
     }
 
     /// <summary>
@@ -209,6 +266,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
     {
         // Unregister the handler for the authentication response
         NetworkClient.UnregisterHandler<AuthResponseMessage>();
+        NetworkClient.UnregisterHandler<KickPlayerMessage>();
     }
 
     #endregion
