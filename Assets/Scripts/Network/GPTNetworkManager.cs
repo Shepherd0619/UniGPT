@@ -43,6 +43,7 @@ public class GPTNetworkManager : NetworkManager
     {
         base.Start();
         LoginWindow.Instance.ShowSplashScreen();
+        ChatWindow.Instance.HideChatWindow();
     }
 
     /// <summary>
@@ -245,7 +246,32 @@ public class GPTNetworkManager : NetworkManager
                     });
                 }
             }
+        }else{
+            switch(transportError){
+                case TransportError.DnsResolve:{
+                    MsgBoxManager.Instance.ShowMsgBox("Could not connect to the server due to DNS Resovle Failure.\nPlease check the DNS server and server address.",false,(result) => {
+                        LoginWindow.Instance.ShowLoginScreen();
+                    });
+                    break;
+                }
+
+                case TransportError.Refused:{
+                    MsgBoxManager.Instance.ShowMsgBox("The server refused your connection.",false,(result) => {
+                        LoginWindow.Instance.ShowLoginScreen();
+                    });
+                    break;
+                }
+
+                case TransportError.ConnectionClosed:{
+                    MsgBoxManager.Instance.ShowMsgBox("The connection was closed.",false,(result) => {
+                        LoginWindow.Instance.ShowLoginScreen();
+                    });
+                    break;
+                }
+            }
         }
+
+        
     }
 
     #endregion

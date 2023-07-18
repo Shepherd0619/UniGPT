@@ -105,7 +105,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                 if (conn.address == GPTNetworkManager.singleton.networkAddress)
                 {
                     //目前Admin只能为本机用户，Moderator可以后设置。
-                    Debug.Log("[GPTNetworkAuthenticator]Admin has connected to the server!");
+                    Debug.Log("[GPTNetworkAuthenticator]Admin has connected to the server! Username: "+msg.Username);
                     authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Success;
                     conn.authenticationData = msg;
                     conn.Send(authResponseMessage);
@@ -115,6 +115,8 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
 
                     UsersList.Add(conn, msg);
                     Debug.Log("[GPTNetworkAuthenticator]Statistics of online users:" + UsersList.Count);
+
+                    ChatWindow.Instance.OnReceiveServerTargetedMessage(conn, new GPTChatMessage{ content = "A wild server admin just jumped right in! "+msg.Username });
                 }
                 else
                 {
@@ -225,7 +227,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             LoginWindow.Instance.ShowLoginScreen();
 
             // Do this AFTER StopHost so it doesn't get cleared / hidden by OnClientDisconnect
-            MsgBoxManager.Instance.ShowMsgBox("Server has rejected your connection with a response.\n\n" + msg.requestResponseMessage, true);
+            MsgBoxManager.Instance.ShowMsgBox("Server has rejected your connection with a response.\n\n" + msg.requestResponseMessage, false);
         }
     }
 

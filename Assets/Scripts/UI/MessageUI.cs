@@ -8,7 +8,8 @@ public class MessageUI : MonoBehaviour
     public RawImage Avatar;
     public string Name;
     public string Message;
-    public ScrollRect messageScroll;
+    //public ScrollRect messageScroll;
+    public RectTransform TextRectTransform;
     public TMP_Text messageText;
     private RectTransform rectTransform;
     private RectTransform scrollTransform;
@@ -17,10 +18,11 @@ public class MessageUI : MonoBehaviour
     void Start()
     {
         rectTransform = transform.GetComponent<RectTransform>();
-        scrollTransform = messageScroll.GetComponent<RectTransform>();
+        //scrollTransform = messageScroll.GetComponent<RectTransform>();
         orgSize = rectTransform.sizeDelta;
         ScreenSizeDetector.Instance.Listeners.Add(gameObject);
         StartCoroutine(LateStart());
+        
     }
 
     // Update is called once per frame
@@ -31,9 +33,12 @@ public class MessageUI : MonoBehaviour
 
     public void AppendMessage(string name, byte[] avatar, string message)
     {
+        Avatar.texture = new Texture2D(1,1);
         ImageConversion.LoadImage((Texture2D)Avatar.texture,avatar);
         Name = name;
         Message = message;
+
+        messageText.text = "<b>"+name+"</b>\n\n"+message;
     }
 
     IEnumerator LateStart()
@@ -49,7 +54,8 @@ public class MessageUI : MonoBehaviour
 
     public void OnScreenSizeChanged()
     {
-        Vector2 ContentSize = messageScroll.content.sizeDelta;
+        //Vector2 ContentSize = messageScroll.content.sizeDelta;
+        Vector2 ContentSize = TextRectTransform.sizeDelta;
         rectTransform.sizeDelta = new Vector2(orgSize.x, ContentSize.y + orgSize.y);
         LayoutRebuilder.MarkLayoutForRebuild(rectTransform.parent as RectTransform);
         LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform.parent as RectTransform);

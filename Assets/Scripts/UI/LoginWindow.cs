@@ -111,7 +111,8 @@ public class LoginWindow : MonoBehaviour
             return;
         }
         SetAuthRequestMessage(false);
-        GPTNetworkManager.singleton.networkAddress = ServerAddress.text + (String.IsNullOrWhiteSpace(Port.text) ? ":7777" : ":" + Port.text);
+        GPTNetworkManager.singleton.networkAddress = ServerAddress.text;
+        //(String.IsNullOrWhiteSpace(Port.text) ? ":7777" : ":" + Port.text)
         GPTNetworkManager.singleton.StartClient();
     }
 

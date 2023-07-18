@@ -5,9 +5,11 @@ using UnityEngine.UI;
 using Mirror;
 using System.Linq;
 using TMPro;
+using System;
 
 public class ChatWindow : NetworkBehaviour
 {
+    public GameObject ChatWindowContainer;
     public static ChatWindow Instance;
     public ScrollRect ChatContainer;
     public GameObject ChatMessagePrefab;
@@ -19,11 +21,11 @@ public class ChatWindow : NetworkBehaviour
     public class ChatRequestLog
     {
         public List<ChatMessage> history;
-        public GPTPlayer sender;
+        public string sender;
     }
 
     public readonly Dictionary<NetworkConnection, Coroutine> chatRequestUnderProcessing = new Dictionary<NetworkConnection, Coroutine>();
-
+    
     private void Awake()
     {
         Instance = this;
@@ -38,17 +40,29 @@ public class ChatWindow : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(Input.GetKeyDown(KeyCode.Return)){
+            if(!String.IsNullOrWhiteSpace(MessageInputField.text) && MessageInputField.interactable){
+                SendMessageToChatGPT(new GPTChatMessage(){ 
+                    Sender = new GPTChatMessage.Who(){ 
+                        Username = LocalPlayer.Username,
+                        Avatar = LocalPlayer.Avatar.ToArray()
+                    }, 
 
+                    content = MessageInputField.text
+                });
+                MessageInputField.interactable = false;
+            }
+        }
     }
 
     public void ShowChatWindow()
     {
-        gameObject.SetActive(true);
+        ChatWindowContainer.SetActive(true);
     }
 
     public void HideChatWindow()
     {
-        gameObject.SetActive(false);
+        ChatWindowContainer.SetActive(false);
     }
 
     public void Init()
@@ -58,6 +72,8 @@ public class ChatWindow : NetworkBehaviour
 
     public void SetLocalPlayerInfo(GPTPlayer player)
     {
+        LocalPlayer = player;
+        LocalPlayerAvatar.texture = new Texture2D(1,1);
         ImageConversion.LoadImage((Texture2D)LocalPlayerAvatar.texture, player.Avatar.ToArray());
     }
 
@@ -68,6 +84,7 @@ public class ChatWindow : NetworkBehaviour
 
         //更新信息框UI
         msg.AppendMessage(sender, avatar, content);
+        Debug.Log("You have one new message.");
     }
 
     [ClientRpc]
@@ -78,15 +95,13 @@ public class ChatWindow : NetworkBehaviour
     {
         if (msg.Sender == null)
         {
+            msg.Sender = new GPTChatMessage.Who();
             //系统信息
             msg.Sender.Username = "SYSTEM";
-            msg.Sender.Avatar.Clear();
-            foreach(byte data in ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("announcement_icon"))){
-                msg.Sender.Avatar.Add(data);
-            }
+            msg.Sender.Avatar = ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("announcement_icon"));
         }
 
-        AppendMessage(msg.Sender.Username, msg.Sender.Avatar.ToArray(), msg.content);
+        AppendMessage(msg.Sender.Username, msg.Sender.Avatar, msg.content);
 
     }
 
@@ -98,21 +113,21 @@ public class ChatWindow : NetworkBehaviour
     {
         if (msg.Sender == null)
         {
+            msg.Sender = new GPTChatMessage.Who();
             //系统信息
             msg.Sender.Username = "SYSTEM";
-            msg.Sender.Avatar.Clear();
-            foreach(byte data in ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("announcement_icon"))){
-                msg.Sender.Avatar.Add(data);
-            }
+            msg.Sender.Avatar = ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("announcement_icon"));
         }
         
-        AppendMessage(msg.Sender.Username, msg.Sender.Avatar.ToArray(), msg.content);
+        AppendMessage(msg.Sender.Username, msg.Sender.Avatar, msg.content);
     }
 
     [TargetRpc]
     public void OnReceiveChatGPTMessage(NetworkConnection conn, string content)
     {
         AppendMessage("ChatGPT", ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("chatgpt_icon")), content);
+        MessageInputField.text = null;
+        MessageInputField.interactable = true;
     }
 
     [Command(requiresAuthority = false)]
@@ -128,8 +143,7 @@ public class ChatWindow : NetworkBehaviour
             {
                 GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
                 search.Username = msg.Receiver.Username;
-                search.Avatar = msg.Receiver.Avatar.ToArray();
-                search.UserRole = msg.Receiver.UserRole;
+                search.Avatar = msg.Receiver.Avatar;
                 if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
                 {
                     NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
@@ -149,12 +163,11 @@ public class ChatWindow : NetworkBehaviour
             GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
             search.Username = msg.Receiver.Username;
             search.Avatar = msg.Receiver.Avatar.ToArray();
-            search.UserRole = msg.Receiver.UserRole;
             if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
             {
                 NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
 
-                ChatRequestLog result = chatRequestLogs.First(x => (x.sender == msg.Sender));
+                ChatRequestLog result = chatRequestLogs.First(x => (x.sender == msg.Sender.Username));
                 if (result != null)
                 {
                     chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(result.history, msg.content, conn));
