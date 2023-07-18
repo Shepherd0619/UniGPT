@@ -13,6 +13,12 @@ public class ChatCompletion : MonoBehaviour
     public string OPENAI_API_KEY = "";
     public static ChatCompletion Instance;
     public readonly Dictionary<NetworkConnection, Coroutine> chatRequestUnderProcessing = new Dictionary<NetworkConnection, Coroutine>();
+    public readonly List<ChatRequestLog> chatRequestLogs = new List<ChatRequestLog>();
+    public class ChatRequestLog
+    {
+        public List<ChatMessage> history;
+        public string sender;
+    }
     private void Awake()
     {
         Instance = this;
@@ -72,6 +78,9 @@ public class ChatCompletion : MonoBehaviour
             // ...
             ChatRequestResponseCallback(responseData, conn);
         }
+
+        chatRequestUnderProcessing.Remove(conn);
+        webRequest.Dispose();
     }
     public void ChatRequestResponseCallback(ChatResponse callback, NetworkConnection conn)
     {

@@ -18,15 +18,6 @@ public class ChatWindow : NetworkBehaviour
     public Button SendMessageBtn;
     public GPTPlayer LocalPlayer;
 
-    public readonly List<ChatRequestLog> chatRequestLogs = new List<ChatRequestLog>();
-    public class ChatRequestLog
-    {
-        public List<ChatMessage> history;
-        public string sender;
-    }
-
-    public readonly Dictionary<NetworkConnection, Coroutine> chatRequestUnderProcessing = new Dictionary<NetworkConnection, Coroutine>();
-
     private void Awake()
     {
         Instance = this;
@@ -170,15 +161,15 @@ public class ChatWindow : NetworkBehaviour
             NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
             if (conn == null)
                 return;
-
             try
             {
-                ChatRequestLog result = chatRequestLogs.FirstOrDefault(x => (x.sender == msg.Sender.Username));
-                chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(result.history, msg.content, conn));
+                //TODO: 这里应该给出一个将ChatGPT聊天记录保存在本地的选项
+                ChatCompletion.ChatRequestLog result = ChatCompletion.Instance.chatRequestLogs.FirstOrDefault(x => (x.sender == msg.Sender.Username));
+                ChatCompletion.Instance.chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(result.history, msg.content, conn));
             }
             catch
             {
-                chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(null, msg.content, conn));
+                ChatCompletion.Instance.chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(null, msg.content, conn));
             }
 
         }
@@ -196,7 +187,7 @@ public class ChatWindow : NetworkBehaviour
         if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
         {
             NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
-            Coroutine result = chatRequestUnderProcessing.First(x => x.Key == conn).Value;
+            Coroutine result = ChatCompletion.Instance.chatRequestUnderProcessing.First(x => x.Key == conn).Value;
             StopCoroutine(result);
         }
     }
