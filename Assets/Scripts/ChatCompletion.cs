@@ -5,12 +5,14 @@ using System.Net.Http;
 using System.Text;
 using Newtonsoft.Json;
 using Mirror;
+using UnityEngine.Networking;
+
 public class ChatCompletion : MonoBehaviour
 {
     private const string API_URL = "https://api.openai.com/v1/chat/completions";
     public string OPENAI_API_KEY = "";
     public static ChatCompletion Instance;
-
+    public readonly Dictionary<NetworkConnection, Coroutine> chatRequestUnderProcessing = new Dictionary<NetworkConnection, Coroutine>();
     private void Awake()
     {
         Instance = this;
@@ -18,7 +20,7 @@ public class ChatCompletion : MonoBehaviour
 
     public Coroutine SendChatRequest(List<ChatMessage> history, string msg, NetworkConnection conn)
     {
-        if (history != null || history.Count == 0)
+        if (history != null && history.Count > 0)
             history.Add(new ChatMessage() { role = "user", content = msg });
         else
         {
@@ -34,6 +36,7 @@ public class ChatCompletion : MonoBehaviour
     private IEnumerator ChatRequestCoroutine(List<ChatMessage> msgs,
         NetworkConnection conn)
     {
+        Debug.Log("Start processing.");
         // Prepare request data
         ChatRequest requestData = new ChatRequest
         {
@@ -44,27 +47,39 @@ public class ChatCompletion : MonoBehaviour
         // Convert request data to JSON
         string jsonRequestData = JsonConvert.SerializeObject(requestData);
 
-        // Create HTTP client and request headers
-        HttpClient client = new HttpClient();
-        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {OPENAI_API_KEY}");
-        client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+        // Create UnityWebRequest object
+        UnityWebRequest webRequest = UnityWebRequest.Post(API_URL, jsonRequestData);
+        // Add request headers
+        webRequest.SetRequestHeader("Authorization", $"Bearer {OPENAI_API_KEY}");
+        webRequest.SetRequestHeader("Content-Type", "application/json");
 
-        // Send POST request
-        var response = client.PostAsync(API_URL, new StringContent(jsonRequestData, Encoding.UTF8, "application/json")).Result;
+        // Send the request asynchronously
+        yield return webRequest.SendWebRequest();
 
-        // Read response data
-        string jsonResponseData = response.Content.ReadAsStringAsync().Result;
-        ChatResponse responseData = JsonConvert.DeserializeObject<ChatResponse>(jsonResponseData);
+        // Check for errors
+        if (webRequest.result != UnityWebRequest.Result.Success)
+        {
+            Debug.LogError("Error sending chat request: " + webRequest.error);
+            ChatRequestResponseErrorCallback(conn, webRequest.error);
+        }
+        else
+        {
+            // Read response data
+            string jsonResponseData = webRequest.downloadHandler.text;
+            ChatResponse responseData = JsonConvert.DeserializeObject<ChatResponse>(jsonResponseData);
 
-        // Handle the response data
-        // ...
-        ChatRequestResponseCallback(responseData, conn);
-        yield return null;
+            // Handle the response data
+            // ...
+            ChatRequestResponseCallback(responseData, conn);
+        }
     }
-
     public void ChatRequestResponseCallback(ChatResponse callback, NetworkConnection conn)
     {
         ChatWindow.Instance.OnReceiveChatGPTMessage(conn, callback.choices[0].message.content);
+    }
+
+    public void ChatRequestResponseErrorCallback(NetworkConnection conn, string errorMsg){
+        ChatWindow.Instance.OnReceiveChatGPTMessage(conn, "Error sending chat request: " + errorMsg);
     }
 }
 

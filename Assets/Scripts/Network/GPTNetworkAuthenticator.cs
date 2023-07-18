@@ -116,7 +116,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                     UsersList.Add(conn, msg);
                     Debug.Log("[GPTNetworkAuthenticator]Statistics of online users:" + UsersList.Count);
 
-                    ChatWindow.Instance.OnReceiveServerTargetedMessage(conn, new GPTChatMessage{ content = "A wild server admin just jumped right in! "+msg.Username });
+                    //ChatWindow.Instance.OnReceiveServerMessage(new GPTChatMessage{ content = "A wild server admin just jumped right in! "+msg.Username });
                 }
                 else
                 {
@@ -142,7 +142,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                 Debug.Log("{GPTNetworkAuthenticator]"+msg.Username+" ("+conn.address+") has joined the server.");
                 Debug.Log("[GPTNetworkAuthenticator]Statistics of online users:" + UsersList.Count);
 
-                ChatWindow.Instance.OnReceiveServerTargetedMessage(conn, new GPTChatMessage{ content = "Let's give "+msg.Username+" a really warm welcome! Hope you can enjoy your stay!" });
+                //ChatWindow.Instance.OnReceiveServerMessage(new GPTChatMessage{ content = "Let's give "+msg.Username+" a really warm welcome! Hope you can enjoy your stay!" });
             }
 
 
@@ -217,6 +217,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             LoginWindow.Instance.HideLoginScreen();
             ChatWindow.Instance.ShowChatWindow();
             Debug.Log($"Authentication Response: {msg.requestResponseCode} {msg.requestResponseMessage}");
+            ChatWindow.Instance.SendMessageToServer(new GPTChatMessage{ content = "Let's give <b>"+ClientInfo.Username+"</b> a really warm welcome! Hope you can enjoy your stay!" });
         }
         else
         {

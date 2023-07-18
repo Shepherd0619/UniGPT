@@ -97,7 +97,6 @@ public class ChatWindow : NetworkBehaviour
 
         //更新信息框UI
         msg.AppendMessage(sender, avatar, content);
-        Debug.Log("You have one new message.");
     }
 
     [ClientRpc]
@@ -153,19 +152,11 @@ public class ChatWindow : NetworkBehaviour
         }
         else
         {
-            if (msg.Sender != null)
-            {
-                GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
-                search.Username = msg.Receiver.Username;
-                search.Avatar = msg.Receiver.Avatar;
-                if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
-                {
-                    NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
-
-                    OnReceiveServerTargetedMessage(conn, msg);
-                }
-            }
-
+            GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
+            search.Username = msg.Receiver.Username;
+            NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
+            if (conn != null)
+                OnReceiveServerTargetedMessage(conn, msg);
         }
     }
 
@@ -176,17 +167,20 @@ public class ChatWindow : NetworkBehaviour
         {
             GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
             search.Username = msg.Sender.Username;
-            search.Avatar = msg.Sender.Avatar;
-            if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
-            {
-                NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
+            NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
+            if (conn == null)
+                return;
 
-                ChatRequestLog result = chatRequestLogs.First(x => (x.sender == msg.Sender.Username));
-                if (result != null)
-                {
-                    chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(result.history, msg.content, conn));
-                }
+            try
+            {
+                ChatRequestLog result = chatRequestLogs.FirstOrDefault(x => (x.sender == msg.Sender.Username));
+                chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(result.history, msg.content, conn));
             }
+            catch
+            {
+                chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(null, msg.content, conn));
+            }
+
         }
 
 
