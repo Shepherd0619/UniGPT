@@ -166,6 +166,9 @@ public class GPTNetworkManager : NetworkManager
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
         base.OnServerDisconnect(conn);
+        // remove player name from the HashSet
+            if (conn.authenticationData != null)
+                ((GPTNetworkAuthenticator)authenticator).UsersList.Remove(conn);
     }
 
     /// <summary>

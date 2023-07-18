@@ -12,7 +12,7 @@ public class GPTPlayer : NetworkBehaviour
     public GPTNetworkAuthenticator.AuthRequestMessage.Role UserRole;
 
     public override void OnStartServer()
-    {
+    {   
         Username = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Username;
         Avatar.Clear();
         foreach(byte data in ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Avatar){

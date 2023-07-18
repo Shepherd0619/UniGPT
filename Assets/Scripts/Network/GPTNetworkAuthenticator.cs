@@ -107,6 +107,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                     //目前Admin只能为本机用户，Moderator可以后设置。
                     Debug.Log("[GPTNetworkAuthenticator]Admin has connected to the server!");
                     authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Success;
+                    conn.authenticationData = msg;
                     conn.Send(authResponseMessage);
 
                     // Accept the successful authentication
@@ -129,6 +130,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             else
             {
                 authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Success;
+                conn.authenticationData = msg;
                 conn.Send(authResponseMessage);
 
                 // Accept the successful authentication
@@ -212,6 +214,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             ClientAccept();
             LoginWindow.Instance.HideLoginScreen();
             ChatWindow.Instance.ShowChatWindow();
+            Debug.Log($"Authentication Response: {msg.requestResponseCode} {msg.requestResponseMessage}");
         }
         else
         {
@@ -224,8 +227,6 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             // Do this AFTER StopHost so it doesn't get cleared / hidden by OnClientDisconnect
             MsgBoxManager.Instance.ShowMsgBox("Server has rejected your connection with a response.\n\n" + msg.requestResponseMessage, true);
         }
-
-        Debug.Log($"Authentication Response: {msg.requestResponseCode} {msg.requestResponseMessage}");
     }
 
     //<summary>
