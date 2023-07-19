@@ -166,9 +166,11 @@ public class ChatWindow : NetworkBehaviour
                 //TODO: 这里应该给出一个将ChatGPT聊天记录保存在本地的选项
                 ChatCompletion.ChatRequestLog result = ChatCompletion.Instance.chatRequestLogs.FirstOrDefault(x => (x.sender == msg.Sender.Username));
                 ChatCompletion.Instance.chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(result.history, msg.content, conn));
+                Debug.Log("ChatRquestLog Found");
             }
             catch
             {
+                ChatCompletion.Instance.chatRequestLogs.Add(new ChatCompletion.ChatRequestLog(){ history = new List<ChatMessage>(), sender = msg.Sender.Username });
                 ChatCompletion.Instance.chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(null, msg.content, conn));
             }
 

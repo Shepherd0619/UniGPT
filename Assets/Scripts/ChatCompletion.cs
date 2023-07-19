@@ -6,6 +6,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Mirror;
 using UnityEngine.Networking;
+using System.Linq;
 
 public class ChatCompletion : MonoBehaviour
 {
@@ -52,12 +53,18 @@ public class ChatCompletion : MonoBehaviour
 
         // Convert request data to JSON
         string jsonRequestData = JsonConvert.SerializeObject(requestData);
-
+        Debug.Log(jsonRequestData);
         // Create UnityWebRequest object
-        UnityWebRequest webRequest = UnityWebRequest.Post(API_URL, jsonRequestData);
+        //UnityWebRequest webRequest = UnityWebRequest.Post(API_URL, jsonRequestData);
+        UnityWebRequest webRequest = new UnityWebRequest(API_URL, "POST");
+        // 一定要要把json数据转成byte传送，否则OpenAI会拒绝
+        webRequest.uploadHandler = new UploadHandlerRaw(System.Text.Encoding.UTF8.GetBytes(jsonRequestData));
+        webRequest.downloadHandler = new DownloadHandlerBuffer();
         // Add request headers
         webRequest.SetRequestHeader("Authorization", $"Bearer {OPENAI_API_KEY}");
         webRequest.SetRequestHeader("Content-Type", "application/json");
+        Debug.Log(webRequest.GetRequestHeader("Authorization"));
+        Debug.Log(webRequest.GetRequestHeader("Content-Type"));
 
         // Send the request asynchronously
         yield return webRequest.SendWebRequest();
@@ -66,6 +73,14 @@ public class ChatCompletion : MonoBehaviour
         if (webRequest.result != UnityWebRequest.Result.Success)
         {
             Debug.LogError("Error sending chat request: " + webRequest.error);
+            string errorLog = "";
+            foreach (KeyValuePair<string, string> kvp in webRequest.GetResponseHeaders())
+            {
+                errorLog += kvp.Key + ": " + kvp.Value + "\n";
+            }
+
+            Debug.LogError("Here are Response Headers: \n" + errorLog);
+
             ChatRequestResponseErrorCallback(conn, webRequest.error);
         }
         else
@@ -76,18 +91,29 @@ public class ChatCompletion : MonoBehaviour
 
             // Handle the response data
             // ...
+            GPTNetworkAuthenticator.AuthRequestMessage result;
+            ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.TryGetValue(conn, out result);
+            try{
+                ChatCompletion.ChatRequestLog x = chatRequestLogs.FirstOrDefault(x => x.sender == result.Username);
+                msgs.Add(new ChatMessage(){ role = "system", content = responseData.choices[0].message.content });
+                x.history = msgs;
+            }catch{
+                Debug.LogWarning("[ChatCompletion]Could not find " + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "'s chat log. The user or server may clear it during this request.");
+            }
             ChatRequestResponseCallback(responseData, conn);
         }
 
         chatRequestUnderProcessing.Remove(conn);
         webRequest.Dispose();
     }
+
     public void ChatRequestResponseCallback(ChatResponse callback, NetworkConnection conn)
     {
         ChatWindow.Instance.OnReceiveChatGPTMessage(conn, callback.choices[0].message.content);
     }
 
-    public void ChatRequestResponseErrorCallback(NetworkConnection conn, string errorMsg){
+    public void ChatRequestResponseErrorCallback(NetworkConnection conn, string errorMsg)
+    {
         ChatWindow.Instance.OnReceiveChatGPTMessage(conn, "Error sending chat request: " + errorMsg);
     }
 }
