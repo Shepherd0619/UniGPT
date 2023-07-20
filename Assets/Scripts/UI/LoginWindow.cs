@@ -14,7 +14,6 @@ public class LoginWindow : MonoBehaviour
     public GameObject Splashscreen;
     public GameObject LoginScreen;
     public TMP_InputField ServerAddress;
-    public TMP_InputField Port;
     public TMP_InputField Username;
     public Button LoginAsClientBtn;
     public Button LoginAsHostBtn;
