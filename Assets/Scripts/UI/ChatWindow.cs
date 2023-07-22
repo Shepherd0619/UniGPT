@@ -91,9 +91,9 @@ public class ChatWindow : NetworkBehaviour
     }
 
     [ClientRpc]
-    //<summary>
-    //服务器向客户端广播信息
-    //</summary>    
+    ///<summary>
+    ///服务器向客户端广播信息
+    ///</summary>    
     public void OnReceiveServerMessage(GPTChatMessage msg)
     {
         if (msg.Sender == null)
@@ -109,9 +109,9 @@ public class ChatWindow : NetworkBehaviour
     }
 
     [TargetRpc]
-    //<summary>
-    //服务器向指定客户端广播信息
-    //</summary>
+    ///<summary>
+    ///服务器向指定客户端广播信息
+    ///</summary>
     public void OnReceiveServerTargetedMessage(NetworkConnection Target, GPTChatMessage msg)
     {
         if (msg.Sender == null)

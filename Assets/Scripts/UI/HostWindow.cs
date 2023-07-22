@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
-using ES3Internal;
+using Newtonsoft.Json;
+using System;
+using System.IO;
 
 public class HostWindow : MonoBehaviour
 {
@@ -13,8 +15,10 @@ public class HostWindow : MonoBehaviour
     public List<UI_ConfigInt> UI_ConfigInts;
     public List<UI_ConfigText> UI_ConfigTexts;
     public Button OKBtn;
+    private Action OKBtn_Action;
     public Button CancelBtn;
-    
+    private Action CancelBtn_Action;
+
     public class Config
     {
         [System.Serializable]
@@ -22,6 +26,7 @@ public class HostWindow : MonoBehaviour
         {
             public string Name;
             public string Value;
+            [JsonIgnore]
             public string Default;
         }
         [System.Serializable]
@@ -29,6 +34,7 @@ public class HostWindow : MonoBehaviour
         {
             public string Name;
             public int Value;
+            [JsonIgnore]
             public int Default;
         }
         [System.Serializable]
@@ -36,6 +42,7 @@ public class HostWindow : MonoBehaviour
         {
             public string Name;
             public bool Value;
+            [JsonIgnore]
             public bool Default;
         }
     }
@@ -43,18 +50,21 @@ public class HostWindow : MonoBehaviour
     public class UI_ConfigText
     {
         public Config.Text Config;
+        [JsonIgnore]
         public TMP_InputField UI;
     }
     [System.Serializable]
     public class UI_ConfigInt
     {
         public Config.Int Config;
+        [JsonIgnore]
         public TMP_InputField UI;
     }
     [System.Serializable]
     public class UI_ConfigBool
     {
         public Config.Bool Config;
+        [JsonIgnore]
         public Toggle UI;
     }
 
@@ -62,6 +72,8 @@ public class HostWindow : MonoBehaviour
     {
         ConfigWindow.SetActive(false);
         Instance = this;
+        OKBtn.onClick.AddListener(OnClickOKBtn);
+        CancelBtn.onClick.AddListener(OnClickCancelBtn);
     }
 
     // Start is called before the first frame update
@@ -76,11 +88,26 @@ public class HostWindow : MonoBehaviour
 
     }
 
-    public void ShowConfigWindow(bool hasCancelBtn)
+    public void ShowConfigWindow(Action OKCallback = null, Action CancelCallback = null, bool hasCancelBtn = true)
     {
         ConfigWindow.SetActive(true);
         //TODO: 应该弄成类似提示框那种东西，这样的话能把ConfigWindow重新利用。
         //如在开服时作为开服前的参数配置，开服后是正常的修改运行时配置。
+        LoadLastSavedConfig();
+
+        OKBtn_Action = OKCallback;
+        CancelBtn_Action = CancelCallback;
+
+        if (!hasCancelBtn)
+        {
+            OKBtn.transform.localPosition = new Vector3(0, OKBtn.transform.localPosition.y, OKBtn.transform.localPosition.z);
+        }
+        else
+        {
+            OKBtn.transform.localPosition = new Vector3(-100f, OKBtn.transform.localPosition.y, OKBtn.transform.localPosition.z);
+        }
+
+        CancelBtn.gameObject.SetActive(hasCancelBtn);
     }
 
     public void HideConfigWindow()
@@ -90,36 +117,100 @@ public class HostWindow : MonoBehaviour
 
     public void LoadLastSavedConfig()
     {
-        foreach(UI_ConfigBool cb in UI_ConfigBools){
-            cb.Config.Value = ES3.Load<bool>(cb.Config.Name, cb.Config.Default);
-            cb.UI.isOn = cb.Config.Value;
-        }
+        // 设置文件路径
+        string filePath = Application.persistentDataPath + "/data.json";
 
-        foreach(UI_ConfigInt ci in UI_ConfigInts){
-            ci.Config.Value = ES3.Load<int>(ci.Config.Name, ci.Config.Default);
-            ci.UI.text = ci.Config.Value.ToString();
-        }
+        // 如果文件存在，则读取并填充数据
+        if (File.Exists(filePath))
+        {
+            // 从文件中读取JSON字符串
+            string jsonData = File.ReadAllText(filePath);
 
-        foreach(UI_ConfigText ct in UI_ConfigTexts){
-            ct.Config.Value = ES3.Load<string>(ct.Config.Name, ct.Config.Default);
-            ct.UI.text = ct.Config.Value;
+            // 反序列化JSON字符串为对象
+            ConfigLists lists = JsonConvert.DeserializeObject<ConfigLists>(jsonData);
+
+            // 填充数据到对应的列表
+            UI_ConfigBools = lists.UI_ConfigBools;
+            UI_ConfigInts = lists.UI_ConfigInts;
+            UI_ConfigTexts = lists.UI_ConfigTexts;
+
+            Debug.Log("Data has been loaded from file");
+            
+            foreach (UI_ConfigBool cb in UI_ConfigBools)
+            {
+                cb.UI.isOn = cb.Config.Value;
+            }
+
+            foreach (UI_ConfigInt ci in UI_ConfigInts)
+            {
+                ci.UI.text = ci.Config.Value.ToString();
+            }
+
+            foreach (UI_ConfigText ct in UI_ConfigTexts)
+            {
+                ct.UI.text = ct.Config.Value;
+            }
+
+            Debug.Log("[HostWindow]LastSavedConfig Loaded!");
         }
-        Debug.Log("[HostWindow]LastSavedConfig Loaded!");
+        else
+        {
+            Debug.Log("File not found! Revert to default.");
+            foreach (UI_ConfigBool cb in UI_ConfigBools)
+            {
+                cb.UI.isOn = cb.Config.Default;
+            }
+
+            foreach (UI_ConfigInt ci in UI_ConfigInts)
+            {
+                ci.UI.text = ci.Config.Default.ToString();
+            }
+
+            foreach (UI_ConfigText ct in UI_ConfigTexts)
+            {
+                ct.UI.text = ct.Config.Default;
+            }
+        }
+        
     }
 
-    public void WriteConfig(){
-        foreach(UI_ConfigBool cb in UI_ConfigBools){
-            ES3.Save<Config.Bool>(cb.Config.Name, cb.Config);
-        }
+    public void WriteConfig()
+    {
+        // 设置文件路径
+        string filePath = Application.persistentDataPath + "/hostConfig.json";
 
-        foreach(UI_ConfigInt ci in UI_ConfigInts){
-            ES3.Save<Config.Int>(ci.Config.Name, ci.Config);
-        }
+        // 创建一个包含三个List的顶级类
+        ConfigLists lists = new ConfigLists();
+        lists.UI_ConfigBools = UI_ConfigBools;
+        lists.UI_ConfigInts = UI_ConfigInts;
+        lists.UI_ConfigTexts = UI_ConfigTexts;
 
-        foreach(UI_ConfigText ct in UI_ConfigTexts){
-            ES3.Save<Config.Text>(ct.Config.Name, ct.Config);
-        }
+        // 序列化数据为JSON字符串
+        string jsonData = JsonConvert.SerializeObject(lists, Formatting.Indented);
+
+        // 将JSON字符串写入文件
+        File.WriteAllText(filePath, jsonData);
         Debug.Log("[HostWindow]Config Written!");
     }
 
+    [System.Serializable]
+    public class ConfigLists
+    {
+        public List<UI_ConfigBool> UI_ConfigBools;
+        public List<UI_ConfigInt> UI_ConfigInts;
+        public List<UI_ConfigText> UI_ConfigTexts;
+    }
+
+    public void OnClickOKBtn()
+    {
+        WriteConfig();
+        OKBtn_Action?.Invoke();
+        HideConfigWindow();
+    }
+
+    public void OnClickCancelBtn()
+    {
+        CancelBtn_Action?.Invoke();
+        HideConfigWindow();
+    }
 }

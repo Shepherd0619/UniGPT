@@ -122,8 +122,15 @@ public class LoginWindow : MonoBehaviour
             MsgBoxManager.Instance.ShowMsgBox("Host is not available on WebGL version. \nIf you wish to be host or set up dedicated server, please move to standalone version.", false);
             return;
         }
+
+        if (String.IsNullOrWhiteSpace(Username.text))
+        {
+            MsgBoxManager.Instance.ShowMsgBox("Please fill in your Username.", false);
+            return;
+        }
         SetAuthRequestMessage(true);
-        GPTNetworkManager.singleton.StartHost();
+        HostWindow.Instance.ShowConfigWindow(()=>{GPTNetworkManager.singleton.StartHost();}, null,true);
+        //GPTNetworkManager.singleton.StartHost();
     }
 
     public void SetAuthRequestMessage(bool isAdmin)

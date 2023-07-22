@@ -163,9 +163,9 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
         connectionsPendingDisconnect.Remove(conn);
     }
 
-    //<summary>
-    //服务器踢出用户
-    //</summary>
+    ///<summary>
+    ///服务器踢出用户
+    ///</summary>
     public void KickPlayer(NetworkConnectionToClient conn, string msg, KickPlayerMessage.ReasonID reason = KickPlayerMessage.ReasonID.None){
         conn.Send(new KickPlayerMessage(){ Reason = reason, Message =  msg });
         StartCoroutine(DelayedDisconnect(conn, 1f));
@@ -232,10 +232,10 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
         }
     }
 
-    //<summary>
-    //客户端接收到踢出信息时要做出的反应
-    //不建议在这里头用客户端那头的断开连接函数，可能会有意料之外的情况。
-    //</summary>
+    ///<summary>
+    ///客户端接收到踢出信息时要做出的反应
+    ///不建议在这里头用客户端那头的断开连接函数，可能会有意料之外的情况。
+    ///</summary>
     public void OnKickPlayerMessage(KickPlayerMessage msg){
         string MsgBoxText = "You have been removed from the server due to\n";
         switch (msg.Reason)
