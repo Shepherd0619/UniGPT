@@ -16,7 +16,7 @@ public class FileOpenDialog : MonoBehaviour
     private static extern void ImageUploaderCaptureClick();
     public static FileOpenDialog Instance;
 
-    public Action<string> onFileSelected;
+    private Action<string> m_onFileSelected;
 
 
     private void Awake()
@@ -38,7 +38,9 @@ public class FileOpenDialog : MonoBehaviour
             info.Filename = Path.GetFileName(fileOpened[0]);
             onFileSelected?.Invoke(JsonConvert.SerializeObject(info));
         }
+
 #elif UNITY_ANDROID || UNITY_IOS
+        m_onFileSelected = onFileSelected;
         NativeGallery.RequestPermission(NativeGallery.PermissionType.Read, NativeGallery.MediaType.Image);
         NativeGallery.GetImageFromGallery(OnMobileFileSelected, "Open Image");
         
@@ -51,16 +53,6 @@ public class FileOpenDialog : MonoBehaviour
             });
         */
     }
-    // 在文件选择对话框中选择完成后的回调函数
-    public void OnFileSelected(string info)
-    {
-        /*
-        FileInfo result = JsonConvert.DeserializeObject<FileInfo>(info);
-        Debug.Log("Selected File: " + result.Filename + ", path: " + result.Path);
-        StartCoroutine(LoadData(result.Path));
-        */
-        onFileSelected?.Invoke(info);
-    }
 
     public void OnMobileFileSelected(string path)
     {
@@ -68,7 +60,7 @@ public class FileOpenDialog : MonoBehaviour
         FileInfo info = new FileInfo();
         info.Path = path;
         info.Filename = Path.GetFileName(path);
-        onFileSelected?.Invoke(JsonConvert.SerializeObject(info));
+        m_onFileSelected?.Invoke(JsonConvert.SerializeObject(info));
     }
 
     IEnumerator LoadData(string url)
