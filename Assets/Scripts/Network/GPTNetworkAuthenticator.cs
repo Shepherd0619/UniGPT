@@ -215,9 +215,9 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             // Authentication has been accepted
             ClientAccept();
             LoginWindow.Instance.HideLoginScreen();
-            ChatWindow.Instance.ShowChatWindow();
+            //ChatWindow.Instance.ShowChatWindow();
             Debug.Log($"Authentication Response: {msg.requestResponseCode} {msg.requestResponseMessage}");
-            ChatWindow.Instance.SendMessageToServer(new GPTChatMessage{ content = "Let's give <b>"+ClientInfo.Username+"</b> a really warm welcome! Hope you can enjoy your stay!" });
+            //ChatWindow.Instance.SendMessageToServer(new GPTChatMessage{ content = "Let's give <b>"+ClientInfo.Username+"</b> a really warm welcome! Hope you can enjoy your stay!" });
         }
         else
         {

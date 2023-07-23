@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using Mirror;
 
 public class HostWindow : MonoBehaviour
 {
@@ -118,7 +119,7 @@ public class HostWindow : MonoBehaviour
     public void LoadLastSavedConfig()
     {
         // 设置文件路径
-        string filePath = Application.persistentDataPath + "/data.json";
+        string filePath = Application.persistentDataPath + "/hostConfig.json";
 
         // 如果文件存在，则读取并填充数据
         if (File.Exists(filePath))
@@ -128,28 +129,27 @@ public class HostWindow : MonoBehaviour
 
             // 反序列化JSON字符串为对象
             ConfigLists lists = JsonConvert.DeserializeObject<ConfigLists>(jsonData);
+            foreach(UI_ConfigBool ui in UI_ConfigBools){
+                ui.Config = lists.UI_ConfigBools.Find(x => x.Config.Name == ui.Config.Name).Config;
+                ui.UI.isOn = ui.Config.Value;
+            }
 
+            foreach(UI_ConfigInt ui in UI_ConfigInts){
+                ui.Config = lists.UI_ConfigInts.Find(x => x.Config.Name == ui.Config.Name).Config;
+                ui.UI.text = ui.Config.Value.ToString();
+            }
+
+            foreach(UI_ConfigText ui in UI_ConfigTexts){
+                ui.Config = lists.UI_ConfigTexts.Find(x => x.Config.Name == ui.Config.Name).Config;
+                ui.UI.text = ui.Config.Value;
+            }
+/*
             // 填充数据到对应的列表
             UI_ConfigBools = lists.UI_ConfigBools;
             UI_ConfigInts = lists.UI_ConfigInts;
             UI_ConfigTexts = lists.UI_ConfigTexts;
-
+*/
             Debug.Log("Data has been loaded from file");
-            
-            foreach (UI_ConfigBool cb in UI_ConfigBools)
-            {
-                cb.UI.isOn = cb.Config.Value;
-            }
-
-            foreach (UI_ConfigInt ci in UI_ConfigInts)
-            {
-                ci.UI.text = ci.Config.Value.ToString();
-            }
-
-            foreach (UI_ConfigText ct in UI_ConfigTexts)
-            {
-                ct.UI.text = ct.Config.Value;
-            }
 
             Debug.Log("[HostWindow]LastSavedConfig Loaded!");
         }
@@ -171,14 +171,27 @@ public class HostWindow : MonoBehaviour
                 ct.UI.text = ct.Config.Default;
             }
         }
-        
+
     }
 
     public void WriteConfig()
     {
         // 设置文件路径
         string filePath = Application.persistentDataPath + "/hostConfig.json";
+        foreach (UI_ConfigBool cb in UI_ConfigBools)
+        {
+            cb.Config.Value = cb.UI.isOn;
+        }
 
+        foreach (UI_ConfigInt ci in UI_ConfigInts)
+        {
+            ci.Config.Value = Convert.ToInt32(ci.UI.text);
+        }
+
+        foreach (UI_ConfigText ct in UI_ConfigTexts)
+        {
+            ct.Config.Value = ct.UI.text;
+        }
         // 创建一个包含三个List的顶级类
         ConfigLists lists = new ConfigLists();
         lists.UI_ConfigBools = UI_ConfigBools;
@@ -204,6 +217,27 @@ public class HostWindow : MonoBehaviour
     public void OnClickOKBtn()
     {
         WriteConfig();
+        /*
+        foreach (Transport tp in ((MultiplexTransport)GPTNetworkManager.singleton.transport).transports)
+        {
+            if (tp.GetType() == typeof(kcp2k.KcpTransport))
+            {
+                ((kcp2k.KcpTransport)tp).Port = (ushort)UI_ConfigInts.Find(x => x.Config.Name == "Port")?.Config.Value;
+                continue;
+            }
+
+            if (tp.GetType() == typeof(Mirror.SimpleWeb.SimpleWebTransport))
+            {
+                ((Mirror.SimpleWeb.SimpleWebTransport)tp).Port = (ushort)UI_ConfigInts.Find(x => x.Config.Name == "WebPort")?.Config.Value;
+                continue;
+            }
+        }
+        */
+        ((kcp2k.KcpTransport)GPTNetworkManager.singleton.transport).Port = (ushort)UI_ConfigInts.Find(x => x.Config.Name == "Port")?.Config.Value;
+
+        ChatCompletion.Instance.OPENAI_API_KEY = UI_ConfigTexts.Find(x => x.Config.Name == "OpenAIAPIKey").Config.Value;
+
+
         OKBtn_Action?.Invoke();
         HideConfigWindow();
     }

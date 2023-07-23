@@ -43,7 +43,6 @@ public class GPTNetworkManager : NetworkManager
     {
         base.Start();
         LoginWindow.Instance.ShowSplashScreen();
-        ChatWindow.Instance.HideChatWindow();
     }
 
     /// <summary>

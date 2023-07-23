@@ -10,25 +10,13 @@ using System;
 public class ChatWindow : NetworkBehaviour
 {
     public GameObject ChatWindowContainer;
-    public static ChatWindow Instance;
     public ScrollRect ChatContainer;
     public GameObject ChatMessagePrefab;
     public TMP_InputField MessageInputField;
     public RawImage LocalPlayerAvatar;
     public Button SendMessageBtn;
-    public GPTPlayer LocalPlayer;
-
-    private void Awake()
-    {
-        Instance = this;
-        SendMessageBtn.onClick.AddListener(UI_SendMessageToServer);
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
+    public static ChatWindow Instance;
+    private GPTNetworkAuthenticator.AuthRequestMessage LocalPlayerInfo;
 
     // Update is called once per frame
     void Update()
@@ -47,38 +35,32 @@ public class ChatWindow : NetworkBehaviour
             {
                 Sender = new GPTChatMessage.Who()
                 {
-                    Username = LocalPlayer.Username,
-                    Avatar = LocalPlayer.Avatar.ToArray()
+                    Username = LocalPlayerInfo.Username,
+                    Avatar = LocalPlayerInfo.Avatar.ToArray()
                 },
 
                 content = MessageInputField.text
             });
             MessageInputField.interactable = false;
             SendMessageBtn.interactable = false;
-            AppendMessage(LocalPlayer.Username, LocalPlayer.Avatar.ToArray(), MessageInputField.text);
+            AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar.ToArray(), MessageInputField.text);
         }
     }
 
-    public void ShowChatWindow()
+    public override void OnStartClient()
     {
-        ChatWindowContainer.SetActive(true);
-    }
-
-    public void HideChatWindow()
-    {
-        ChatWindowContainer.SetActive(false);
+        base.OnStartLocalPlayer();
+        LocalPlayerInfo = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).ClientInfo;
+        Instance = this;
+        SendMessageBtn.onClick.AddListener(UI_SendMessageToServer);
+        SendMessageToServer(new GPTChatMessage { content = "Let's give " + LocalPlayerInfo.Username + " a really warm welcome! Hope you can enjoy your stay!" });
+        LocalPlayerAvatar.texture = new Texture2D(1, 1);
+        ImageConversion.LoadImage((Texture2D)LocalPlayerAvatar.texture, LocalPlayerInfo.Avatar.ToArray());
     }
 
     public void Init()
     {
 
-    }
-
-    public void SetLocalPlayerInfo(GPTPlayer player)
-    {
-        LocalPlayer = player;
-        LocalPlayerAvatar.texture = new Texture2D(1, 1);
-        ImageConversion.LoadImage((Texture2D)LocalPlayerAvatar.texture, player.Avatar.ToArray());
     }
 
     public void AppendMessage(string sender, byte[] avatar, string content)

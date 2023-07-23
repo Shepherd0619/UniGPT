@@ -20,9 +20,4 @@ public class GPTPlayer : NetworkBehaviour
         }
         UserRole = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).UserRole;
     }
-
-    public override void OnStartLocalPlayer()
-    {
-        ChatWindow.Instance.SetLocalPlayerInfo(this);
-    }
 }
