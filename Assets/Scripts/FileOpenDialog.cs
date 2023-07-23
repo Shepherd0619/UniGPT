@@ -7,6 +7,8 @@ using System.Collections;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
 using System.Runtime.InteropServices;
+using SFB;
+using System.Windows.Forms;
 
 public class FileOpenDialog : MonoBehaviour
 {
@@ -24,43 +26,30 @@ public class FileOpenDialog : MonoBehaviour
 
     public void OpenFileDialog(Action<string> onFileSelected)
     {
-#if UNITY_EDITOR
-        string filePath = UnityEditor.EditorUtility.OpenFilePanel("Open File", "", "");
-        if (!string.IsNullOrEmpty(filePath))
+        //TODO: 理论上后续应该加个文件后缀的参数，文件选择对话框操作应该是协程
+#if UNITY_EDITOR || UNITY_STANDALONE
+        ExtensionFilter[] filters = { new ExtensionFilter("Image", "jpg", "png") };
+        string[] fileOpened = StandaloneFileBrowser.OpenFilePanel("Open Image", "", filters, false);
+
+        if (fileOpened.Length != 0 && !string.IsNullOrEmpty(fileOpened[0]))
         {
             FileInfo info = new FileInfo();
-            info.Path = filePath;
-            info.Filename = Path.GetFileName(filePath);
+            info.Path = fileOpened[0];
+            info.Filename = Path.GetFileName(fileOpened[0]);
             onFileSelected?.Invoke(JsonConvert.SerializeObject(info));
         }
-#elif UNITY_WEBGL
-#if !UNITY_EDITOR
-        WebGLInput.captureAllKeyboardInput = false; // 禁用键盘输入
+#elif UNITY_ANDROID || UNITY_IOS
+        NativeGallery.RequestPermission(NativeGallery.PermissionType.Read, NativeGallery.MediaType.Image);
+        NativeGallery.GetImageFromGallery(OnMobileFileSelected, "Open Image");
+        
 #endif
-/*
-        filePathText.text = ""; // 清空文本框内容
-        openButton.interactable = false; // 禁用打开按钮
-*/
-
-        onFileSelected += (data) =>
-        {
-            WebGLInput.captureAllKeyboardInput = true; // 启用键盘输入
-        };
-
-        this.onFileSelected = onFileSelected;
-
-        // 通过JavaScript函数来触发文件选择对话框
-        Application.ExternalEval(@"
-            document.getElementById('upload').click();
-        ");
-#endif
-    /*
-        OpenFileDialog((filePath) =>
-        {
-            // 在这里处理用户选择的文件路径
-            Debug.Log("Selected File: " + filePath);
-        });
-    */
+        /*
+            OpenFileDialog((filePath) =>
+            {
+                // 在这里处理用户选择的文件路径
+                Debug.Log("Selected File: " + filePath);
+            });
+        */
     }
     // 在文件选择对话框中选择完成后的回调函数
     public void OnFileSelected(string info)
@@ -71,6 +60,15 @@ public class FileOpenDialog : MonoBehaviour
         StartCoroutine(LoadData(result.Path));
         */
         onFileSelected?.Invoke(info);
+    }
+
+    public void OnMobileFileSelected(string path)
+    {
+        Debug.Log("[NativeGallery]Path is " + path);
+        FileInfo info = new FileInfo();
+        info.Path = path;
+        info.Filename = Path.GetFileName(path);
+        onFileSelected?.Invoke(JsonConvert.SerializeObject(info));
     }
 
     IEnumerator LoadData(string url)

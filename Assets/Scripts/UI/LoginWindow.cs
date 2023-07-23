@@ -7,6 +7,7 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using System;
 using Mirror;
+using System.IO;
 
 public class LoginWindow : MonoBehaviour
 {
@@ -73,7 +74,11 @@ public class LoginWindow : MonoBehaviour
     {
         FileOpenDialog.FileInfo result = JsonConvert.DeserializeObject<FileOpenDialog.FileInfo>(info);
         Debug.Log("Selected File: " + result.Filename + ", path: " + result.Path);
+#if UNITY_EDITOR || UNITY_STANDALONE
         StartCoroutine(LoadData(result.Path));
+#elif UNITY_ANDROID || UNITY_IOS
+        StartCoroutine(LoadLocalData(result.Path));
+#endif
     }
 
     IEnumerator LoadData(string url)
@@ -94,6 +99,27 @@ public class LoginWindow : MonoBehaviour
 
         Avatar.texture = texture;
         Debug.Log("Avatar updated!");
+    }
+
+    IEnumerator LoadLocalData(string filePath)
+    {
+        string url = "file://" + filePath;
+
+        byte[] fileBytes = null;
+        using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
+        {
+            fileBytes = new byte[fileStream.Length];
+            fileStream.Read(fileBytes, 0, (int)fileStream.Length);
+        }
+
+        Texture2D texture = new Texture2D(1, 1);
+        texture.LoadImage(fileBytes);
+        Debug.Log("LoadImage complete!");
+
+        Avatar.texture = texture;
+        Debug.Log("Avatar updated!");
+
+        yield return null;
     }
 
     public void LoginAsClient()
