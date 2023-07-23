@@ -103,7 +103,7 @@ public class LoginWindow : MonoBehaviour
 
     IEnumerator LoadLocalData(string filePath)
     {
-        Texture2D texture = NativeGallery.LoadImageAtPath(filePath);
+        Texture2D texture = NativeGallery.LoadImageAtPath(filePath,-1,false,true,false);
         Debug.Log("LoadImage complete!");
 
         Avatar.texture = texture;
