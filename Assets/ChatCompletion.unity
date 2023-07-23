@@ -2457,7 +2457,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 2
     m_WrapAround: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
@@ -2487,7 +2487,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 201052726}
   m_HandleRect: {fileID: 201052725}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -4978,8 +4978,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 618336553}
   m_HandleRect: {fileID: 618336552}
   m_Direction: 2
-  m_Value: 0.99999905
-  m_Size: 0.9310062
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -8046,7 +8046,6 @@ MonoBehaviour:
   MessageInputField: {fileID: 714193169}
   LocalPlayerAvatar: {fileID: 302526187}
   SendMessageBtn: {fileID: 1374515103}
-  LocalPlayer: {fileID: 0}
 --- !u!1 &1281975602
 GameObject:
   m_ObjectHideFlags: 0
