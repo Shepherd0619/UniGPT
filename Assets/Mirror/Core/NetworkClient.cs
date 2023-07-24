@@ -116,6 +116,11 @@ namespace Mirror
         // scene loading
         public static bool isLoadingScene;
 
+        // connection quality
+        // this is set by a virtual function in NetworkManager,
+        // which allows users to overwrite it with their own estimations.
+        public static ConnectionQuality connectionQuality = ConnectionQuality.ESTIMATING;
+
         // initialization //////////////////////////////////////////////////////
         static void AddTransportHandlers()
         {
@@ -318,37 +323,40 @@ namespace Mirror
                 //       the next time.
                 //       => consider moving processing to NetworkEarlyUpdate.
                 while (!isLoadingScene &&
-                       unbatcher.GetNextMessage(out NetworkReader reader, out double remoteTimestamp))
+                       unbatcher.GetNextMessage(out ArraySegment<byte> message, out double remoteTimestamp))
                 {
-                    // enough to read at least header size?
-                    if (reader.Remaining >= NetworkMessages.IdSize)
+                    using (NetworkReaderPooled reader = NetworkReaderPool.Get(message))
                     {
-                        // make remoteTimeStamp available to the user
-                        connection.remoteTimeStamp = remoteTimestamp;
-
-                        // handle message
-                        if (!UnpackAndInvoke(reader, channelId))
+                        // enough to read at least header size?
+                        if (reader.Remaining >= NetworkMessages.IdSize)
                         {
-                            // warn, disconnect and return if failed
-                            // -> warning because attackers might send random data
-                            // -> messages in a batch aren't length prefixed.
-                            //    failing to read one would cause undefined
-                            //    behaviour for every message afterwards.
-                            //    so we need to disconnect.
-                            // -> return to avoid the below unbatches.count error.
-                            //    we already disconnected and handled it.
-                            Debug.LogWarning($"NetworkClient: failed to unpack and invoke message. Disconnecting.");
+                            // make remoteTimeStamp available to the user
+                            connection.remoteTimeStamp = remoteTimestamp;
+
+                            // handle message
+                            if (!UnpackAndInvoke(reader, channelId))
+                            {
+                                // warn, disconnect and return if failed
+                                // -> warning because attackers might send random data
+                                // -> messages in a batch aren't length prefixed.
+                                //    failing to read one would cause undefined
+                                //    behaviour for every message afterwards.
+                                //    so we need to disconnect.
+                                // -> return to avoid the below unbatches.count error.
+                                //    we already disconnected and handled it.
+                                Debug.LogWarning($"NetworkClient: failed to unpack and invoke message. Disconnecting.");
+                                connection.Disconnect();
+                                return;
+                            }
+                        }
+                        // otherwise disconnect
+                        else
+                        {
+                            // WARNING, not error. can happen if attacker sends random data.
+                            Debug.LogWarning($"NetworkClient: received Message was too short (messages should start with message id)");
                             connection.Disconnect();
                             return;
                         }
-                    }
-                    // otherwise disconnect
-                    else
-                    {
-                        // WARNING, not error. can happen if attacker sends random data.
-                        Debug.LogWarning($"NetworkClient: received Message was too short (messages should start with message id)");
-                        connection.Disconnect();
-                        return;
                     }
                 }
 
@@ -463,6 +471,7 @@ namespace Mirror
                 RegisterHandler<ObjectDestroyMessage>(OnObjectDestroy);
                 RegisterHandler<ObjectHideMessage>(OnObjectHide);
                 RegisterHandler<NetworkPongMessage>(NetworkTime.OnClientPong, false);
+                RegisterHandler<NetworkPingMessage>(NetworkTime.OnClientPing, false);
                 RegisterHandler<SpawnMessage>(OnSpawn);
                 RegisterHandler<ObjectSpawnStartedMessage>(OnObjectSpawnStarted);
                 RegisterHandler<ObjectSpawnFinishedMessage>(OnObjectSpawnFinished);
@@ -472,7 +481,7 @@ namespace Mirror
             // These handlers are the same for host and remote clients
             RegisterHandler<TimeSnapshotMessage>(OnTimeSnapshotMessage);
             RegisterHandler<ChangeOwnerMessage>(OnChangeOwner);
-            RegisterHandler<RpcBufferMessage>(OnRPCBufferMessage);
+            RegisterHandler<RpcMessage>(OnRPCMessage);
         }
 
         /// <summary>Register a handler for a message type T. Most should require authentication.</summary>
@@ -1185,11 +1194,12 @@ namespace Mirror
             foreach (NetworkIdentity identity in allIdentities)
             {
                 // add all unspawned NetworkIdentities to spawnable objects
-                // need to ensure it's not active yet because
+                // need to check netId to make sure object is not spawned
+                // fixes: https://github.com/MirrorNetworking/Mirror/issues/3541
                 // PrepareToSpawnSceneObjects may be called multiple times in case
                 // the ObjectSpawnStarted message is received multiple times.
                 if (Utils.IsSceneObject(identity) &&
-                    !identity.gameObject.activeSelf)
+                    identity.netId == 0)
                 {
                     if (spawnableObjects.TryGetValue(identity.sceneId, out NetworkIdentity existingIdentity))
                     {
@@ -1297,21 +1307,6 @@ namespace Mirror
                     identity.HandleRemoteCall(message.componentIndex, message.functionHash, RemoteCallType.ClientRpc, reader);
             }
             // Rpcs often can't be applied if interest management unspawned them
-        }
-
-        static void OnRPCBufferMessage(RpcBufferMessage message)
-        {
-            // Debug.Log($"NetworkClient.OnRPCBufferMessage of {message.payload.Count} bytes");
-            // parse all rpc messages from the buffer
-            using (NetworkReaderPooled reader = NetworkReaderPool.Get(message.payload))
-            {
-                while (reader.Remaining > 0)
-                {
-                    // read message without header
-                    RpcMessage rpcMessage = reader.Read<RpcMessage>();
-                    OnRPCMessage(rpcMessage);
-                }
-            }
         }
 
         static void OnObjectHide(ObjectHideMessage message) => DestroyObject(message.netId);
@@ -1723,8 +1718,8 @@ namespace Mirror
             GUILayout.Box($"DriftEMA: {NetworkClient.driftEma.Value:F2}");
             GUILayout.Box($"DelTimeEMA: {NetworkClient.deliveryTimeEma.Value:F2}");
             GUILayout.Box($"timescale: {localTimescale:F2}");
-            GUILayout.Box($"BTM: {snapshotSettings.bufferTimeMultiplier:F2}");
-            GUILayout.Box($"RTT: {NetworkTime.rtt * 1000:000}");
+            GUILayout.Box($"BTM: {NetworkClient.bufferTimeMultiplier:F2}"); // current dynamically adjusted multiplier
+            GUILayout.Box($"RTT: {NetworkTime.rtt * 1000:F0}ms");
             GUILayout.EndHorizontal();
 
             GUILayout.EndArea();

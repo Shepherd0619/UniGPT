@@ -56,6 +56,8 @@ public class FileOpenDialog : MonoBehaviour
 
     public void OnMobileFileSelected(string path)
     {
+        if (String.IsNullOrWhiteSpace(path))
+            return;
         Debug.Log("[NativeGallery]Path is " + path);
         FileInfo info = new FileInfo();
         info.Path = path;

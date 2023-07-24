@@ -51,13 +51,15 @@ namespace Mirror
         // max message content size (without header) calculation for convenience
         // -> Transport.GetMaxPacketSize is the raw maximum
         // -> Every message gets serialized into <<id, content>>
-        // -> Every serialized message get put into a batch with a header
-        public static int MaxContentSize
+        // -> Every serialized message get put into a batch with one timestamp per batch
+        // -> Every message in a batch has a varuint size header.
+        //    use the worst case VarUInt size for the largest possible
+        //    message size = int.max.
+        public static int MaxContentSize(int channelId)
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => Transport.active.GetMaxPacketSize()
-                - IdSize
-                - Batcher.HeaderSize;
+            // calculate the max possible size that can fit in a batch
+            int transportMax = Transport.active.GetMaxPacketSize(channelId);
+            return transportMax - IdSize - Batcher.MaxMessageOverhead(transportMax);
         }
 
         // automated message id from type hash.
@@ -84,7 +86,6 @@ namespace Mirror
 
         // read only the message id.
         // common function in case we ever change the header size.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool UnpackId(NetworkReader reader, out ushort messageId)
         {
             // read message type
@@ -102,7 +103,6 @@ namespace Mirror
 
         // version for handlers with channelId
         // inline! only exists for 20-30 messages and they call it all the time.
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static NetworkMessageDelegate WrapHandler<T, C>(Action<C, T, int> handler, bool requireAuthentication)
             where T : struct, NetworkMessage
             where C : NetworkConnection

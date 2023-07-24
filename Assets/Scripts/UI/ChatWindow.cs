@@ -53,7 +53,7 @@ public class ChatWindow : NetworkBehaviour
         LocalPlayerInfo = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).ClientInfo;
         Instance = this;
         SendMessageBtn.onClick.AddListener(UI_SendMessageToServer);
-        SendMessageToServer(new GPTChatMessage { content = "Let's give " + LocalPlayerInfo.Username + " a really warm welcome! Hope you can enjoy your stay!" });
+        SendMessageToServer(new GPTChatMessage { content = "Let's give <b>" + LocalPlayerInfo.Username + "</b> a really warm welcome! Hope you can enjoy your stay!" });
         LocalPlayerAvatar.texture = new Texture2D(1, 1);
         ImageConversion.LoadImage((Texture2D)LocalPlayerAvatar.texture, LocalPlayerInfo.Avatar.ToArray());
     }

@@ -42,7 +42,12 @@ public class GPTNetworkManager : NetworkManager
     public override void Start()
     {
         base.Start();
+#if !UNITY_SERVER
         LoginWindow.Instance.ShowSplashScreen();
+#elif UNITY_SERVER
+        StartServer();
+        Debug.Log("[GPTNetworkManager]Server mode started!");
+#endif
     }
 
     /// <summary>
@@ -61,7 +66,7 @@ public class GPTNetworkManager : NetworkManager
         base.OnDestroy();
     }
 
-    #endregion
+#endregion
 
     #region Start & Stop
 
@@ -167,8 +172,10 @@ public class GPTNetworkManager : NetworkManager
     {
         base.OnServerDisconnect(conn);
         // remove player name from the HashSet
-            if (conn.authenticationData != null)
-                ((GPTNetworkAuthenticator)authenticator).UsersList.Remove(conn);
+            if (conn.authenticationData != null) { 
+                ((GPTNetworkAuthenticator)authenticator).UsersList.Remove(conn);}
+
+        Debug.Log("[GPTNetworkManager]" +((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username +"("+ conn.address +") has disconnected to server.");
     }
 
     /// <summary>
@@ -178,7 +185,12 @@ public class GPTNetworkManager : NetworkManager
     /// <param name="conn">Connection of the client...may be null</param>
     /// <param name="transportError">TransportError enum</param>
     /// <param name="message">String message of the error.</param>
-    public override void OnServerError(NetworkConnectionToClient conn, TransportError transportError, string message) { }
+    public override void OnServerError(NetworkConnectionToClient conn, TransportError transportError, string message) {
+        if (conn != null)
+            Debug.LogError("[GPTNetworkManager]" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "(" + conn.address + ")'s transport has raised an error.\n" + transportError.ToString()+"\n"+message);
+        else
+            Debug.LogError("[GPTNetworkManager]There was a critical error in server.\n" + transportError.ToString()+"\n"+message);
+    }
 
     #endregion
 

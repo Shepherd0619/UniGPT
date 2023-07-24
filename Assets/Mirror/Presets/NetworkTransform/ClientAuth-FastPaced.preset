@@ -9,7 +9,8 @@ Preset:
   m_Name: ClientAuth-FastPaced
   m_TargetType:
     m_NativeTypeID: 114
-    m_ManagedTypePPtr: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb, type: 3}
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 2f74aedd71d9a4f55b3ce499326d45fb,
+      type: 3}
     m_ManagedTypeFallback: 
   m_Properties:
   - target: {fileID: 0}
