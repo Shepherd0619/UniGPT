@@ -175,7 +175,7 @@ public class GPTNetworkManager : NetworkManager
         // remove player name from the HashSet
             if (conn.authenticationData != null) { 
                 ((GPTNetworkAuthenticator)authenticator).UsersList.Remove(conn);}
-        Debug.Log("[GPTNetworkManager]" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "(" + conn.address + ") has disconnected to server.");
+        Debug.Log("[GPTNetworkManager]" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "(" + conn.address + ") has disconnected from server.");
     }
 
     /// <summary>
