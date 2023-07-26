@@ -170,6 +170,8 @@ public class HostWindow : MonoBehaviour
             {
                 ct.UI.text = ct.Config.Default;
             }
+
+            WriteConfig();
         }
 
     }
@@ -246,5 +248,72 @@ public class HostWindow : MonoBehaviour
     {
         CancelBtn_Action?.Invoke();
         HideConfigWindow();
+    }
+
+    public void Server_LoadAndApplySettings()
+    {
+        // 设置文件路径
+        string filePath = Application.persistentDataPath + "/hostConfig.json";
+
+        // 如果文件存在，则读取并填充数据
+        if (File.Exists(filePath))
+        {
+            // 从文件中读取JSON字符串
+            string jsonData = File.ReadAllText(filePath);
+
+            // 反序列化JSON字符串为对象
+            ConfigLists lists = JsonConvert.DeserializeObject<ConfigLists>(jsonData);
+            foreach (UI_ConfigBool ui in UI_ConfigBools)
+            {
+                ui.Config = lists.UI_ConfigBools.Find(x => x.Config.Name == ui.Config.Name).Config;
+                ui.UI.isOn = ui.Config.Value;
+            }
+
+            foreach (UI_ConfigInt ui in UI_ConfigInts)
+            {
+                ui.Config = lists.UI_ConfigInts.Find(x => x.Config.Name == ui.Config.Name).Config;
+                ui.UI.text = ui.Config.Value.ToString();
+            }
+
+            foreach (UI_ConfigText ui in UI_ConfigTexts)
+            {
+                ui.Config = lists.UI_ConfigTexts.Find(x => x.Config.Name == ui.Config.Name).Config;
+                ui.UI.text = ui.Config.Value;
+            }
+            /*
+                        // 填充数据到对应的列表
+                        UI_ConfigBools = lists.UI_ConfigBools;
+                        UI_ConfigInts = lists.UI_ConfigInts;
+                        UI_ConfigTexts = lists.UI_ConfigTexts;
+            */
+            Debug.Log("Data has been loaded from file");
+
+            Debug.Log("[HostWindow]LastSavedConfig Loaded!");
+        }
+        else
+        {
+            Debug.Log("[Server]Config File not found! Revert to default. We will create a default one for ya. "+filePath);
+            foreach (UI_ConfigBool cb in UI_ConfigBools)
+            { 
+                cb.UI.isOn = cb.Config.Default;
+            }
+
+            foreach (UI_ConfigInt ci in UI_ConfigInts)
+            {
+                ci.UI.text = ci.Config.Default.ToString();
+            }
+
+            foreach (UI_ConfigText ct in UI_ConfigTexts)
+            {
+                ct.UI.text = ct.Config.Default;
+            }
+
+            WriteConfig();
+        }
+
+        ((kcp2k.KcpTransport)GPTNetworkManager.singleton.transport).Port = (ushort)UI_ConfigInts.Find(x => x.Config.Name == "Port")?.Config.Value;
+
+        ChatCompletion.Instance.OPENAI_API_KEY = UI_ConfigTexts.Find(x => x.Config.Name == "OpenAIAPIKey").Config.Value;
+
     }
 }

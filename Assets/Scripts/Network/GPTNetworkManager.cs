@@ -45,6 +45,7 @@ public class GPTNetworkManager : NetworkManager
 #if !UNITY_SERVER
         LoginWindow.Instance.ShowSplashScreen();
 #elif UNITY_SERVER
+        HostWindow.Instance.Server_LoadAndApplySettings();
         StartServer();
         Debug.Log("[GPTNetworkManager]Server mode started!");
 #endif
@@ -216,6 +217,9 @@ public class GPTNetworkManager : NetworkManager
     public override void OnClientDisconnect()
     {
         LoginWindow.Instance.ShowLoginScreen();
+        ChatWindow.Instance.AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "You have been disconnected from server!");
+        MsgBoxManager.Instance.ShowMsgBox("You have been disconnected from server.", false);
+        ChatWindow.Instance.Reset();
     }
 
     /// <summary>
@@ -263,21 +267,27 @@ public class GPTNetworkManager : NetworkManager
                     MsgBoxManager.Instance.ShowMsgBox("Could not connect to the server due to DNS Resovle Failure.\nPlease check the DNS server and server address.",false,(result) => {
                         LoginWindow.Instance.ShowLoginScreen();
                     });
-                    break;
+                        isReconnecting = false;
+                        CurrentReconnectAttemptCounter = 0;
+                        break;
                 }
 
                 case TransportError.Refused:{
                     MsgBoxManager.Instance.ShowMsgBox("The server refused your connection.",false,(result) => {
                         LoginWindow.Instance.ShowLoginScreen();
                     });
-                    break;
+                        isReconnecting = false;
+                        CurrentReconnectAttemptCounter = 0;
+                        break;
                 }
 
                 case TransportError.ConnectionClosed:{
                     MsgBoxManager.Instance.ShowMsgBox("The connection was closed.",false,(result) => {
                         LoginWindow.Instance.ShowLoginScreen();
                     });
-                    break;
+                        isReconnecting = false;
+                        CurrentReconnectAttemptCounter = 0;
+                        break;
                 }
             }
         }

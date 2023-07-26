@@ -131,6 +131,20 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             }
             else
             {
+                foreach(AuthRequestMessage search in UsersList.Values)
+                {
+                    if(search.Username == msg.Username)
+                    {
+                        authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Error;
+                        authResponseMessage.requestResponseMessage = "Change the username";
+                        conn.Send(authResponseMessage);
+                        conn.isAuthenticated = false;
+                        connectionsPendingDisconnect.Add(conn);
+                        StartCoroutine(DelayedDisconnect(conn, 1f));
+                        return;
+                    }
+                }
+
                 authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Success;
                 conn.authenticationData = msg;
                 conn.Send(authResponseMessage);
@@ -262,7 +276,8 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
 
         if(!String.IsNullOrEmpty(msg.Message) && !String.IsNullOrWhiteSpace(msg.Message))
             MsgBoxText += "\nPlease refer to the following detailed message: " + msg.Message;
-        
+
+        ChatWindow.Instance.AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), MsgBoxText);
         MsgBoxManager.Instance.ShowMsgBox(MsgBoxText, true);
     }
 

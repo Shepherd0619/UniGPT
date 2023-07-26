@@ -58,9 +58,17 @@ public class ChatWindow : NetworkBehaviour
         ImageConversion.LoadImage((Texture2D)LocalPlayerAvatar.texture, LocalPlayerInfo.Avatar.ToArray());
     }
 
-    public void Init()
+    public override void OnStartServer()
     {
+        base.OnStartServer();
+        Instance = this;
+    }
 
+    public void Reset()
+    {
+        MessageInputField.text = null;
+        MessageInputField.interactable = true;
+        SendMessageBtn.interactable = true;
     }
 
     public void AppendMessage(string sender, byte[] avatar, string content)
