@@ -268,7 +268,7 @@ public class GPTNetworkManager : NetworkManager
         }else{
             switch(transportError){
                 case TransportError.DnsResolve:{
-                    MsgBoxManager.Instance.ShowMsgBox("Could not connect to the server due to DNS Resovle Failure.\nPlease check the DNS server and server address.",false,(result) => {
+                    MsgBoxManager.Instance.ShowMsgBox("Could not connect to the server due to DNS Resolve Failure.\nPlease check the DNS server and server address.",false,(result) => {
                         LoginWindow.Instance.ShowLoginScreen();
                     });
                         isReconnecting = false;
