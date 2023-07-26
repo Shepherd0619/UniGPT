@@ -94,21 +94,34 @@ public class LoginWindow : MonoBehaviour
         Debug.Log("File loaded! " + url);
 
         Texture2D texture = new Texture2D(1, 1);
-        texture.LoadImage(request.downloadHandler.data);
-        Debug.Log("LoadImage complete!");
+        if (texture.EncodeToPNG().Length / 1024 > 100)
+        {
+            MsgBoxManager.Instance.ShowMsgBox("The image you uploaded is too large.\nPlease consider choosing a smaller one (<=100kb).", false, null);
+        }
+        else
+        {
+            texture.LoadImage(request.downloadHandler.data);
+            Debug.Log("LoadImage complete!");
 
-        Avatar.texture = texture;
-        Debug.Log("Avatar updated!");
+            Avatar.texture = texture;
+            Debug.Log("Avatar updated!");
+        }
     }
 
     IEnumerator LoadLocalData(string filePath)
     {
         Texture2D texture = NativeGallery.LoadImageAtPath(filePath,-1,false,true,false);
+        texture.Reinitialize(1, 1);
         Debug.Log("LoadImage complete!");
-
-        Avatar.texture = texture;
-        Debug.Log("Avatar updated!");
-
+        if (texture.EncodeToPNG().Length / 1024 > 100)
+        {
+            MsgBoxManager.Instance.ShowMsgBox("The image you uploaded is too large.\nPlease consider choosing a smaller one (<=100kb).", false, null);
+        }
+        else
+        {
+            Avatar.texture = texture;
+            Debug.Log("Avatar updated!");
+        }
         yield return null;
     }
 
