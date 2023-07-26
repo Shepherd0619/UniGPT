@@ -6,6 +6,8 @@ using Mirror;
 using System.Linq;
 using TMPro;
 using System;
+using System.Security.Cryptography;
+using UnityEngine.EventSystems;
 
 public class ChatWindow : NetworkBehaviour
 {
@@ -15,8 +17,11 @@ public class ChatWindow : NetworkBehaviour
     public TMP_InputField MessageInputField;
     public RawImage LocalPlayerAvatar;
     public Button SendMessageBtn;
+    public GameObject ChatGPTProcessingIndicator;
     public static ChatWindow Instance;
     private GPTNetworkAuthenticator.AuthRequestMessage LocalPlayerInfo;
+
+    private bool isDragging = false;
 
     // Update is called once per frame
     void Update()
@@ -43,6 +48,7 @@ public class ChatWindow : NetworkBehaviour
             });
             MessageInputField.interactable = false;
             SendMessageBtn.interactable = false;
+            ChatGPTProcessingIndicator.SetActive(true);
             AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar.ToArray(), MessageInputField.text);
         }
     }
@@ -53,11 +59,19 @@ public class ChatWindow : NetworkBehaviour
         LocalPlayerInfo = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).ClientInfo;
         Instance = this;
         SendMessageBtn.onClick.AddListener(UI_SendMessageToServer);
+        AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "You have joined " + GPTNetworkManager.singleton.networkAddress + ". ");
         SendMessageToServer(new GPTChatMessage { content = "Let's give <b>" + LocalPlayerInfo.Username + "</b> a really warm welcome! Hope you can enjoy your stay!" });
         LocalPlayerAvatar.texture = new Texture2D(1, 1);
         ImageConversion.LoadImage((Texture2D)LocalPlayerAvatar.texture, LocalPlayerInfo.Avatar.ToArray());
+        Reset();
     }
 
+    public override void OnStopClient()
+    {
+        base.OnStopClient();
+        Reset();
+        SendMessageBtn.onClick.RemoveAllListeners();
+    }
     public override void OnStartServer()
     {
         base.OnStartServer();
@@ -69,6 +83,7 @@ public class ChatWindow : NetworkBehaviour
         MessageInputField.text = null;
         MessageInputField.interactable = true;
         SendMessageBtn.interactable = true;
+        ChatGPTProcessingIndicator.SetActive(false);
     }
 
     public void AppendMessage(string sender, byte[] avatar, string content)
@@ -78,6 +93,25 @@ public class ChatWindow : NetworkBehaviour
 
         //更新信息框UI
         msg.AppendMessage(sender, avatar, content);
+
+        if (!isDragging)
+            StartCoroutine(ScrollToLatestMessage());
+    }
+
+    IEnumerator ScrollToLatestMessage()
+    {
+        yield return new WaitForSeconds(0.1f);
+        ChatContainer.normalizedPosition = new Vector2(0, 0);
+    }
+
+    public void OnBeginDrag()
+    {
+        isDragging = true;
+    }
+
+    public void OnEndDrag()
+    {
+        isDragging = false;
     }
 
     [ClientRpc]
@@ -122,6 +156,7 @@ public class ChatWindow : NetworkBehaviour
         MessageInputField.text = null;
         MessageInputField.interactable = true;
         SendMessageBtn.interactable = true;
+        ChatGPTProcessingIndicator.SetActive(false);
     }
 
     [Command(requiresAuthority = false)]

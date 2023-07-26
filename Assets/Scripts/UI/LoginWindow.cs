@@ -19,7 +19,7 @@ public class LoginWindow : MonoBehaviour
     public Button LoginAsClientBtn;
     public Button LoginAsHostBtn;
     public RawImage Avatar;
-
+    private int msgboxId;
     private void Awake()
     {
         Instance = this;
@@ -128,7 +128,20 @@ public class LoginWindow : MonoBehaviour
         SetAuthRequestMessage(false);
         GPTNetworkManager.singleton.networkAddress = ServerAddress.text;
         //(String.IsNullOrWhiteSpace(Port.text) ? ":7777" : ":" + Port.text)
+        if (NetworkClient.active)
+            GPTNetworkManager.singleton.StopClient();
         GPTNetworkManager.singleton.StartClient();
+        msgboxId = MsgBoxManager.Instance.ShowMsgBoxNonInteractable("Connecting to " + GPTNetworkManager.singleton.networkAddress, true, null);
+        StartCoroutine(ConnectingToServer());
+    }
+
+    IEnumerator ConnectingToServer()
+    {
+        while (NetworkClient.isConnecting)
+        {
+            yield return null;
+        }
+        MsgBoxManager.Instance.RemoveNonInteractableMsgBox(msgboxId, true);
     }
 
     public void LoginAsHost()
@@ -145,7 +158,20 @@ public class LoginWindow : MonoBehaviour
             return;
         }
         SetAuthRequestMessage(true);
-        HostWindow.Instance.ShowConfigWindow(()=>{GPTNetworkManager.singleton.StartHost();}, null,true);
+        HostWindow.Instance.ShowConfigWindow(()=>{
+            if (NetworkServer.active)
+            {
+                MsgBoxManager.Instance.ShowMsgBox("There is a server running in the background.\n Continuing to start the host will force shutdown the running server.\n\nProceed?", true, (result) =>
+                {
+                    if (result)
+                    {
+                        GPTNetworkManager.singleton.StopHost();
+                    }
+                });
+                
+            }
+            GPTNetworkManager.singleton.StartHost();
+        }, null,true);
         //GPTNetworkManager.singleton.StartHost();
     }
 

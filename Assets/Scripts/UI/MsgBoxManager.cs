@@ -33,6 +33,25 @@ public class MsgBoxManager : MonoBehaviour
         MsgBoxes.Add(msgBox);
     }
 
+    public int ShowMsgBoxNonInteractable(string content, bool hasCancelButton, Action<bool> result = null)
+    {
+        GameObject prefab = Instantiate(Prefab, GameObject.FindObjectOfType<Canvas>().transform);
+        MsgBox msgBox = prefab.GetComponent<MsgBox>();
+        msgBox.ShowMsgBoxNonInteractable(content, hasCancelButton, result);
+        MsgBoxes.Add(msgBox);
+        return MsgBoxes.Count - 1;
+    }
+
+    public void RemoveNonInteractableMsgBox(int msgBoxId, bool result)
+    {
+        if (MsgBoxes == null || MsgBoxes[msgBoxId] == null)
+            return;
+
+        MsgBoxes[msgBoxId].callback?.Invoke(result);
+        Destroy(MsgBoxes[msgBoxId].gameObject);
+        MsgBoxes.RemoveAt(msgBoxId);
+    }
+
     public void RemoveMsgBox(MsgBox msgBox){
         MsgBoxes.Remove(msgBox);
         Destroy(msgBox.gameObject);

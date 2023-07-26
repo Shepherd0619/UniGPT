@@ -41,6 +41,35 @@ public class MsgBox : MonoBehaviour
         maskPanel.SetActive(true);
     }
 
+    // 显示信息框并等待脚本返回result
+    public void ShowMsgBoxNonInteractable(string content, bool hasCancelButton, Action<bool> result)
+    {
+        // 设置信息框的内容和标题
+        contentText.text = content;
+
+        confirmButton.SetActive(false);
+
+        // 根据是否有取消按钮来显示或隐藏取消按钮
+        cancelButton.SetActive(hasCancelButton);
+
+        if (hasCancelButton)
+        {
+            confirmButton.transform.localPosition = new Vector3(-170.0f, confirmButton.transform.localPosition.y, confirmButton.transform.localPosition.z);
+        }
+        else
+        {
+            confirmButton.transform.localPosition = new Vector3(0.0f, confirmButton.transform.localPosition.y, confirmButton.transform.localPosition.z);
+        }
+
+        //保存回调函数
+        callback = result;
+
+        // 禁用其他UI，只允许与信息框互动
+        maskPanel.SetActive(true);
+
+
+    }
+
     // 确认按钮点击事件
     public void ConfirmButtonClicked()
     {

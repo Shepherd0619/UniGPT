@@ -44,7 +44,7 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
-    private bool showGraphicsDropDown = false;
+    //private bool showGraphicsDropDown = false;
 
     void OnGUI()
     {
@@ -61,7 +61,21 @@ public class PauseMenu : MonoBehaviour
             //Make Main Menu button
             if (GUI.Button(new Rect(Screen.width / 2 - 100, Screen.height / 2 - 50, 250, 50), "Disconnect from server"))
             {
-                NetworkClient.Disconnect();
+                if (NetworkClient.activeHost)
+                {
+                    MsgBoxManager.Instance.ShowMsgBox("Since you are the host, the server will be stopped immediately once you disconnect from server.\nProceed?", true, (result) =>
+                    {
+                        if (result)
+                        {
+                            GPTNetworkManager.singleton.StopHost();
+                        }
+                    });
+                }
+                else
+                {
+                    NetworkClient.Disconnect();
+                }
+                pauseEnabled = false;
             }
 
             /*

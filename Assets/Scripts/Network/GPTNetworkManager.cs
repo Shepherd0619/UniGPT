@@ -175,8 +175,7 @@ public class GPTNetworkManager : NetworkManager
         // remove player name from the HashSet
             if (conn.authenticationData != null) { 
                 ((GPTNetworkAuthenticator)authenticator).UsersList.Remove(conn);}
-
-        Debug.Log("[GPTNetworkManager]" +((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username +"("+ conn.address +") has disconnected to server.");
+        Debug.Log("[GPTNetworkManager]" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "(" + conn.address + ") has disconnected to server.");
     }
 
     /// <summary>
@@ -217,9 +216,14 @@ public class GPTNetworkManager : NetworkManager
     public override void OnClientDisconnect()
     {
         LoginWindow.Instance.ShowLoginScreen();
-        ChatWindow.Instance.AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "You have been disconnected from server!");
+        if (ChatWindow.Instance)
+        {
+            ChatWindow.Instance.AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "You have been disconnected from server!");
+            ChatWindow.Instance.Reset();
+        }
+
         MsgBoxManager.Instance.ShowMsgBox("You have been disconnected from server.", false);
-        ChatWindow.Instance.Reset();
+        
     }
 
     /// <summary>
@@ -289,6 +293,17 @@ public class GPTNetworkManager : NetworkManager
                         CurrentReconnectAttemptCounter = 0;
                         break;
                 }
+
+                default:
+                    {
+                        MsgBoxManager.Instance.ShowMsgBox("We are sorry to inform you that there is an unexpected error occured.\nIf this is the first time you encounter, please restart the app.\nIf it is not, please contact developer.", false, (result) =>
+                        {
+                            LoginWindow.Instance.ShowLoginScreen();
+                        });
+                        isReconnecting = false;
+                        CurrentReconnectAttemptCounter = 0;
+                        break;
+                    }
             }
         }
 
