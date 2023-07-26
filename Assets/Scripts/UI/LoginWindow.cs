@@ -110,8 +110,8 @@ public class LoginWindow : MonoBehaviour
 
     IEnumerator LoadLocalData(string filePath)
     {
-        Texture2D texture = NativeGallery.LoadImageAtPath(filePath,-1,false,true,false);
-        texture.Reinitialize(1, 1);
+        Texture2D texture = new Texture2D(1, 1);
+        texture.LoadImage(NativeGallery.LoadImageAtPath(filePath,-1,false).EncodeToPNG());
         Debug.Log("LoadImage complete!");
         if (texture.EncodeToPNG().Length / 1024 > 100)
         {
