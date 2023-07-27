@@ -39,6 +39,8 @@ public class MessageUI : MonoBehaviour
         Message = message;
 
         messageText.text = "<b>"+name+"</b>\n\n"+message;
+
+        GetComponent<CodeSnippetHighlighter>().FormatAndHighlightCode(messageText);
     }
 
     IEnumerator LateStart()

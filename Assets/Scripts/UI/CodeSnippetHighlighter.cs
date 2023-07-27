@@ -3,13 +3,7 @@ using TMPro;
 
 public class CodeSnippetHighlighter : MonoBehaviour
 {
-    [SerializeField] private TMP_Text codeText;
-
-    private void Start()
-    {
-        FormatAndHighlightCode();
-    }
-    public void FormatAndHighlightCode()
+    public void FormatAndHighlightCode(TMP_Text codeText)
     {
         // Get the existing text
         string existingText = codeText.text;
