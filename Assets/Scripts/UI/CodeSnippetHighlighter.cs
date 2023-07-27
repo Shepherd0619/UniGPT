@@ -88,7 +88,15 @@ public class CodeSnippetHighlighter : MonoBehaviour
         // CSS keywords
         "color", "background-color", "font-size", "font-family", "margin", "padding",
         "border", "width", "height", "text-align", "display", "position", "float",
-        "top", "bottom", "left", "right", "opacity", "z-index", "box-shadow", "transition"
+        "top", "bottom", "left", "right", "opacity", "z-index", "box-shadow", "transition",
+
+        // PHP keywords
+        "echo", "if", "else", "elseif", "endif", "while", "do", "for", "foreach", "as",
+        "break", "continue", "switch", "case", "default", "function", "return", "var",
+        "const", "class", "abstract", "interface", "trait", "namespace", "use", "require",
+        "require_once", "include", "include_once", "throw", "try", "catch", "finally",
+        "global", "static", "public", "private", "protected", "final", "extends", "implements",
+        "__DIR__", "__FILE__", "__LINE__", "__FUNCTION__", "__CLASS__", "__METHOD__"
 
     };
         // Check if the word is a keyword
