@@ -296,10 +296,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "<font=\"consola SDF\"></font>// Hello World! program\r\nnamespace HelloWorld\r\n{\r\n   
-    class Hello {         \r\n        static void Main(string[] args)\r\n       
-    {\r\n            System.Console.WriteLine(\"Hello World!\");\r\n        }\r\n   
-    }\r\n}"
+  m_text: "Apologies for the confusion earlier. \n\n```\n// Hello World! program\r\nnamespace
+    HelloWorld\r\n{\r\n    class Hello {         \r\n        static void Main(string[]
+    args)\r\n        {\r\n            System.Console.WriteLine(\"Hello World!\");\r\n       
+    }\r\n    }\r\n}\n```\n\nEnjoy!"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

@@ -7,35 +7,53 @@ public class CodeSnippetHighlighter : MonoBehaviour
 
     private void Start()
     {
-        FormatAndHighlightCode(codeText.text);
+        FormatAndHighlightCode();
     }
-    public void FormatAndHighlightCode(string code)
+    public void FormatAndHighlightCode()
     {
-        // Clear existing text
-        codeText.text = "";
+        // Get the existing text
+        string existingText = codeText.text;
 
-        // Split code into lines
-        string[] lines = code.Split('\n');
+        // Get the start and end delimiter for the code block
+        string delimiter = "```";
 
-        codeText.text = "<font=\"consola SDF\">";
-        // Iterate through each line
-        foreach (string line in lines)
+        // Find the start and end indices of the code block
+        int startIndex = existingText.IndexOf(delimiter);
+        int endIndex = existingText.LastIndexOf(delimiter);
+
+        // Check if the code block delimiters are found
+        if (startIndex != -1 && endIndex != -1)
         {
-            // Split line into words
-            string[] words = line.Split(' ');
+            // Extract the code block
+            string codeBlock = existingText.Substring(startIndex + delimiter.Length, endIndex - startIndex - delimiter.Length).Trim();
 
-            // Iterate through each word
-            foreach (string word in words)
+            // Split the code block into lines
+            string[] codeLines = codeBlock.Split('\n');
+
+            string result = "<font=\"consola SDF\">";
+            // Iterate through each line in the code block
+            foreach (string line in codeLines)
             {
-                // Check if word is a keyword or special syntax
-                bool isKeyword = IsKeyword(word);
+                // Split the line into words
+                string[] words = line.Split(' ');
 
-                // Apply formatting and highlighting
-                codeText.text += isKeyword ? "<color=blue>" + word + "</color> " : word + " ";
+                // Iterate through each word
+                foreach (string word in words)
+                {
+                    // Check if the word is a keyword or special syntax
+                    bool isKeyword = IsKeyword(word);
+
+                    // Apply formatting and highlighting
+                    result += isKeyword ? "<color=blue>" + word + "</color> " : word + " ";
+                }
+                result += "\n";
             }
-            codeText.text += "\n";
+            result += "</font>";
+
+            existingText = existingText.Replace(existingText.Substring(startIndex, endIndex - startIndex + delimiter.Length), result);
+
+            codeText.text = existingText;
         }
-        codeText.text += "</font>";
     }
 
     private bool IsKeyword(string word)
