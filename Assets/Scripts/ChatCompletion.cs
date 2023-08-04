@@ -74,9 +74,17 @@ public class ChatCompletion : MonoBehaviour
         {
             Debug.LogError("Error sending chat request: " + webRequest.error);
             string errorLog = "";
-            foreach (KeyValuePair<string, string> kvp in webRequest.GetResponseHeaders())
+            Dictionary<string, string> responseHeaders = webRequest.GetResponseHeaders();
+            if (responseHeaders != null && responseHeaders.Count > 0)
             {
-                errorLog += kvp.Key + ": " + kvp.Value + "\n";
+                foreach (KeyValuePair<string, string> kvp in responseHeaders)
+                {
+                    errorLog += kvp.Key + ": " + kvp.Value + "\n";
+                }
+            }
+            else
+            {
+                errorLog = "Internal Error.";
             }
 
             Debug.LogError("Here are Response Headers: \n" + errorLog);
