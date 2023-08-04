@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using Mirror;
 using UnityEngine.Networking;
 using System.Linq;
+using System.IO;
 
 public class ChatCompletion : MonoBehaviour
 {
@@ -66,6 +67,14 @@ public class ChatCompletion : MonoBehaviour
         Debug.Log(webRequest.GetRequestHeader("Authorization"));
         Debug.Log(webRequest.GetRequestHeader("Content-Type"));
 
+        // 设置文件路径
+        string filePath = Application.persistentDataPath + "/GPTChatLog" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + ".json";
+        // 序列化数据为JSON字符串
+        string jsonData = JsonConvert.SerializeObject(msgs, Formatting.Indented);
+
+        // 将JSON字符串写入文件
+        File.WriteAllText(filePath, jsonData);
+
         // Send the request asynchronously
         yield return webRequest.SendWebRequest();
 
@@ -118,6 +127,27 @@ public class ChatCompletion : MonoBehaviour
     public void ChatRequestResponseCallback(ChatResponse callback, NetworkConnection conn)
     {
         ChatWindow.Instance.OnReceiveChatGPTMessage(conn, callback.choices[0].message.content);
+        // 设置文件路径
+        string filePath = Application.persistentDataPath + "/GPTChatLog" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + ".json";
+        // 如果文件存在，则读取并填充数据
+        if (File.Exists(filePath))
+        {
+            // 从文件中读取JSON字符串
+            string jsonData = File.ReadAllText(filePath);
+
+            // 反序列化JSON字符串为对象
+            List<ChatMessage> list = JsonConvert.DeserializeObject<List<ChatMessage>>(jsonData);
+            ChatMessage response = new ChatMessage() { role = "system", content = callback.choices[0].message.content };
+            list.Add(response);
+            jsonData = JsonConvert.SerializeObject(list, Formatting.Indented);
+
+            // 将JSON字符串写入文件
+            File.WriteAllText(filePath, jsonData);
+        }
+        else
+        {
+            Debug.LogWarning("[ChatCompletion]" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "'s chat log is missing!");
+        }
     }
 
     public void ChatRequestResponseErrorCallback(NetworkConnection conn, string errorMsg)
