@@ -130,10 +130,11 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                     conn.authenticationData = msg;
                     conn.Send(authResponseMessage);
 
+                    UsersList.Add(conn, msg);
                     // Accept the successful authentication
                     ServerAccept(conn);
 
-                    UsersList.Add(conn, msg);
+                    
                     Debug.Log("[GPTNetworkAuthenticator]Statistics of online users:" + UsersList.Count);
 
                     //ChatWindow.Instance.OnReceiveServerMessage(new GPTChatMessage{ content = "A wild server admin just jumped right in! "+msg.Username });
@@ -169,10 +170,11 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                 conn.authenticationData = msg;
                 conn.Send(authResponseMessage);
 
+                UsersList.Add(conn, msg);
                 // Accept the successful authentication
                 ServerAccept(conn);
 
-                UsersList.Add(conn, msg);
+                
                 Debug.Log("{GPTNetworkAuthenticator]"+msg.Username+" ("+conn.address+") has joined the server.");
                 Debug.Log("[GPTNetworkAuthenticator]Statistics of online users:" + UsersList.Count);
 

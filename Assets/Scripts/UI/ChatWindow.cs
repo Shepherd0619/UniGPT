@@ -6,6 +6,8 @@ using Mirror;
 using System.Linq;
 using TMPro;
 using System;
+using GluonGui.Dialog;
+using Newtonsoft.Json;
 
 public class ChatWindow : NetworkBehaviour
 {
@@ -206,13 +208,9 @@ public class ChatWindow : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void StopChatGPTProcessing(GPTPlayer applicant)
     {
-        GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
-        search.Username = applicant.Username;
-        search.Avatar = applicant.Avatar.ToArray();
-        search.UserRole = applicant.UserRole;
-        if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
+        NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key;
+        if (conn != null)
         {
-            NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key;
             Coroutine result = ChatCompletion.Instance.chatRequestUnderProcessing.First(x => x.Key == conn).Value;
             StopCoroutine(result);
         }
@@ -221,18 +219,15 @@ public class ChatWindow : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void RequestFullChatLog(GPTPlayer applicant)
     {
-        GPTNetworkAuthenticator.AuthRequestMessage search = new GPTNetworkAuthenticator.AuthRequestMessage();
-        search.Username = applicant.Username;
-        search.Avatar = applicant.Avatar.ToArray();
-        search.UserRole = applicant.UserRole;
-        if (((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.ContainsValue(search))
+        NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key;
+        if (conn != null)
         {
             Debug.Log("[ChatWindow]Requesting " + applicant.Username + "'s full chat log......");
-            List<ChatMessage> result = ChatCompletion.Instance.GetFullChatLog(applicant.Username);
-            if (result != null && result.Count > 0)
+            string result = ChatCompletion.Instance.GetFullChatLog(applicant.Username);
+            if (!string.IsNullOrEmpty(result))
             {
                 Debug.Log("[ChatWindow]Sending " + applicant.Username+"'s chat log to himself/herself.....");
-                OnReceiveFullChatLog(((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == search.Username).Key,result);
+                OnReceiveFullChatLog(((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key,result);
             }
             else
             {
@@ -242,26 +237,39 @@ public class ChatWindow : NetworkBehaviour
     }
 
     [TargetRpc]
-    public void OnReceiveFullChatLog(NetworkConnection conn, List<ChatMessage> log)
+    public void OnReceiveFullChatLog(NetworkConnection conn, string log)
     {
         Debug.Log("[ChatWindow]Successfully receive full chat log.");
         //清屏
-        foreach(Transform obj in ChatContainer.content.GetComponentsInChildren<Transform>())
-        {
-            Destroy(obj.gameObject);
-        }
+        //foreach(MessageUI obj in ChatContainer.content.GetComponentsInChildren<MessageUI>())
+        //{
+        //    Destroy(obj.gameObject);
+        //}
+        List<ChatMessage> result = JsonConvert.DeserializeObject<List<ChatMessage>>(log);
         //输出
-        foreach(ChatMessage msg in log)
+        //foreach(ChatMessage msg in result)
+        //{
+        //    if (msg.role.Equals("system", StringComparison.OrdinalIgnoreCase))
+        //    {
+        //        AppendMessage("ChatGPT", UIAssetsManager.Instance.GetIcon2Texture("chatgpt_icon").EncodeToPNG(), msg.content);
+        //    }
+        //    else
+        //    {
+        //        AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar,msg.content);
+        //    }
+
+        AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "--- MESSAGE(S) FROM CHAT LOG ---");
+        for (int i = 1; i < result.Count; i++)
         {
-            if (msg.role.Equals("system", StringComparison.OrdinalIgnoreCase))
+            if (result[i].role.Equals("system", StringComparison.OrdinalIgnoreCase))
             {
-                AppendMessage("ChatGPT", UIAssetsManager.Instance.GetIcon2Texture("chatgpt_icon").EncodeToPNG(), msg.content);
+                AppendMessage("ChatGPT", UIAssetsManager.Instance.GetIcon2Texture("chatgpt_icon").EncodeToPNG(), result[i].content);
             }
             else
             {
-                AppendMessage(((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username, ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Avatar,msg.content);
+                AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar, result[i].content);
             }
         }
-        AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "--- MESSAGE(S) ABOVE FROM CHAT LOG. ---");
+        AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "--- END OF CHAT LOG ---");
     }
 }

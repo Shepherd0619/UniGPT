@@ -69,7 +69,7 @@ public class ChatCompletion : MonoBehaviour
         Debug.Log(webRequest.GetRequestHeader("Content-Type"));
 
         // 设置文件路径
-        string filePath = Application.persistentDataPath + "/GPTChatLog" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + ".json";
+        string filePath = Application.persistentDataPath + "/GPTChatLog_" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + ".json";
         // 序列化数据为JSON字符串
         string jsonData = JsonConvert.SerializeObject(msgs, Formatting.Indented);
 
@@ -156,27 +156,25 @@ public class ChatCompletion : MonoBehaviour
         ChatWindow.Instance.OnReceiveChatGPTMessage(conn, "Error sending chat request: " + errorMsg);
     }
 
-    public List<ChatMessage> GetFullChatLog(string username)
+    public string GetFullChatLog(string username)
     {
-        foreach (ChatRequestLog log in chatRequestLogs)
-        {
-            if(log.sender == username)
-            {
-                return log.history;
-            }
-        }
+        //foreach (ChatRequestLog log in chatRequestLogs)
+        //{
+        //    if(log.sender == username)
+        //    {
+        //        return log.history;
+        //    }
+        //}
 
-        Debug.LogWarning("[ChatCompletion]Could not get " + username + "'s full chat log in server's realtime chat log list. User may be newbie or want to retrieve the local copy?");
-        //TODO：理论上要查一下本地文件有没有这个用户的log
+        //Debug.LogWarning("[ChatCompletion]Could not get " + username + "'s full chat log in server's realtime chat log list. User may be newbie or want to retrieve the local copy?");
+        
         string filePath = Application.persistentDataPath + "/GPTChatLog_" + username + ".json";
 
         if (File.Exists(filePath))
         {
             // 从文件中读取JSON字符串
             string jsonData = File.ReadAllText(filePath);
-
-            // 反序列化JSON字符串为对象
-            return JsonConvert.DeserializeObject<List<ChatMessage>>(jsonData);
+            return jsonData;
         }
 
         return null;
