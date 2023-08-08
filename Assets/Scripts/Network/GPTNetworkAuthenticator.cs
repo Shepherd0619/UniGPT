@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using Mirror;
 using UnityEngine;
-using UnityEngine.UI;
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-authenticators
     API Reference: https://mirror-networking.com/docs/api/Mirror.NetworkAuthenticator.html
@@ -15,6 +14,14 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
     public readonly Dictionary<NetworkConnection, AuthRequestMessage> UsersList = new Dictionary<NetworkConnection, AuthRequestMessage>();
     // 客户端信息（如用户名、头像等），后续可以定制一下，比如增加用户名密码验证。
     public AuthRequestMessage ClientInfo;
+    private string[] ForbiddenNickName = new string[]
+    {
+        "admin",
+        "system",
+        "announcement",
+        "announcer",
+        "ChatGPT",
+    };
 
     #region Messages
     public struct AuthRequestMessage : NetworkMessage
@@ -99,6 +106,19 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
         }
         else
         {
+            foreach(string black in ForbiddenNickName)
+            {
+                if (msg.Username.Contains(black, StringComparison.OrdinalIgnoreCase))
+                {
+                    authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Error;
+                    authResponseMessage.requestResponseMessage = "Invalid Username.";
+                    conn.Send(authResponseMessage);
+                    conn.isAuthenticated = false;
+                    connectionsPendingDisconnect.Add(conn);
+                    StartCoroutine(DelayedDisconnect(conn, 1f));
+                    return;
+                }
+            }
 
             if (msg.UserRole == AuthRequestMessage.Role.Admin)
             {

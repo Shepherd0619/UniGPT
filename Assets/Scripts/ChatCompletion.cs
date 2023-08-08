@@ -28,6 +28,7 @@ public class ChatCompletion : MonoBehaviour
 
     public Coroutine SendChatRequest(List<ChatMessage> history, string msg, NetworkConnection conn)
     {
+        //TODO:后续需要改进一下这个函数，让服务器找记录
         if (history != null && history.Count > 0)
             history.Add(new ChatMessage() { role = "user", content = msg });
         else
@@ -128,7 +129,7 @@ public class ChatCompletion : MonoBehaviour
     {
         ChatWindow.Instance.OnReceiveChatGPTMessage(conn, callback.choices[0].message.content);
         // 设置文件路径
-        string filePath = Application.persistentDataPath + "/GPTChatLog" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + ".json";
+        string filePath = Application.persistentDataPath + "/GPTChatLog_" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + ".json";
         // 如果文件存在，则读取并填充数据
         if (File.Exists(filePath))
         {
@@ -153,6 +154,32 @@ public class ChatCompletion : MonoBehaviour
     public void ChatRequestResponseErrorCallback(NetworkConnection conn, string errorMsg)
     {
         ChatWindow.Instance.OnReceiveChatGPTMessage(conn, "Error sending chat request: " + errorMsg);
+    }
+
+    public List<ChatMessage> GetFullChatLog(string username)
+    {
+        foreach (ChatRequestLog log in chatRequestLogs)
+        {
+            if(log.sender == username)
+            {
+                return log.history;
+            }
+        }
+
+        Debug.LogWarning("[ChatCompletion]Could not get " + username + "'s full chat log in server's realtime chat log list. User may be newbie or want to retrieve the local copy?");
+        //TODO：理论上要查一下本地文件有没有这个用户的log
+        string filePath = Application.persistentDataPath + "/GPTChatLog_" + username + ".json";
+
+        if (File.Exists(filePath))
+        {
+            // 从文件中读取JSON字符串
+            string jsonData = File.ReadAllText(filePath);
+
+            // 反序列化JSON字符串为对象
+            return JsonConvert.DeserializeObject<List<ChatMessage>>(jsonData);
+        }
+
+        return null;
     }
 }
 
