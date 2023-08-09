@@ -8,6 +8,7 @@ using Mirror;
 using UnityEngine.Networking;
 using System.Linq;
 using System.IO;
+using System;
 
 public class ChatCompletion : MonoBehaviour
 {
@@ -178,6 +179,61 @@ public class ChatCompletion : MonoBehaviour
         }
 
         return null;
+    }
+
+    public void ClearChatLog(string username)
+    {
+
+        foreach (ChatRequestLog log in chatRequestLogs)
+        {
+            if (log.sender == username)
+            {
+                log.history.Clear();
+                Debug.Log("[ChatCompletion]Successfully cleared "+ username +"'s realtime chat log.");
+                break;
+            }
+        }
+
+        string filePath = Application.persistentDataPath + "/GPTChatLog_" + username + ".json";
+
+        if (File.Exists(filePath))
+        {
+            File.Delete(filePath);
+            Debug.Log("[ChatCompletion]Successfully cleared " + username + "'s chat log.");
+            NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == username).Key;
+            if (conn != null)
+                ChatWindow.Instance.OnReceiveServerTargetedMessage(conn, new GPTChatMessage() { content = "Your chat log has been cleared!" });
+        }
+    }
+
+    public void LoadChatLogFromDisk(string username)
+    {
+        Debug.Log("[ChatCompletion]Start loading "+ username +"'s chat log from disk.");
+        string directoryPath = Application.persistentDataPath;
+
+        string searchPattern = $"GPTChatLog_{username}.json";
+        string[] files = Directory.GetFiles(directoryPath, searchPattern);
+
+        if(files.Count() > 0)
+        {
+            Debug.Log("[ChatCompletion]Mounting " + username + "'s chat log to realtime, stand by...");
+            List<ChatMessage> result = JsonConvert.DeserializeObject<List<ChatMessage>>(File.ReadAllText(files[0]));
+            foreach(ChatRequestLog log in chatRequestLogs)
+            {
+                if(log.sender == username)
+                {
+                    log.history = result;
+                    return;
+                }
+            }
+
+            chatRequestLogs.Add(new ChatRequestLog() { history = result, sender = username });
+            Debug.Log("[ChatCompletion]Successfully loaded " + username + "'s chat log.");
+        }
+        else
+        {
+            Debug.Log("[ChatCompletion]Unable to find " + username + "'s chat log from disk.");
+        }
     }
 }
 

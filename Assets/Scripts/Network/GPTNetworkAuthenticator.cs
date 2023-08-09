@@ -131,6 +131,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                     conn.Send(authResponseMessage);
 
                     UsersList.Add(conn, msg);
+                    ChatCompletion.Instance.LoadChatLogFromDisk(msg.Username);
                     // Accept the successful authentication
                     ServerAccept(conn);
 
@@ -171,6 +172,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                 conn.Send(authResponseMessage);
 
                 UsersList.Add(conn, msg);
+                ChatCompletion.Instance.LoadChatLogFromDisk(msg.Username);
                 // Accept the successful authentication
                 ServerAccept(conn);
 

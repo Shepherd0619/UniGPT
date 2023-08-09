@@ -1,8 +1,7 @@
 using System;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Mirror;
-using System.Collections;
+using System.Collections.Generic;
 
 /*
 	Documentation: https://mirror-networking.gitbook.io/docs/components/network-manager
@@ -17,7 +16,14 @@ public class GPTNetworkManager : NetworkManager
     public bool isReconnecting = false;
     public int MaxReconnectAttempt = 5;
     private int CurrentReconnectAttemptCounter = 0;
-
+    //自助指令
+    public List<SelfHelpCommand> SelfHelpCommands = new List<SelfHelpCommand>();
+    public class SelfHelpCommand
+    {
+        public string Command;
+        public Action<string[], NetworkConnection> Executation;
+        public string Summary;
+    }
     /// <summary>
     /// Runs on both Server and Client
     /// Networking is NOT initialized when this fires
@@ -27,6 +33,48 @@ public class GPTNetworkManager : NetworkManager
         base.Awake();
         singleton = this;
     }
+
+    #region 自助指令
+    public void RegisterSelfHelpCommands()
+    {
+        //注册系统内置指令
+        SelfHelpCommands.Add(new SelfHelpCommand()
+        {
+            Command = "help",
+            Executation = (args, conn) =>
+            {
+                string list = String.Empty;
+                foreach (SelfHelpCommand obj in SelfHelpCommands)
+                {
+                    list += "<b>/" + obj.Command + "</b> - " + obj.Summary + "\n";
+                }
+                //ChatWindow.Instance.AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "Available commands:\n" + list);
+                ChatWindow.Instance.OnReceiveServerTargetedMessage(conn, new GPTChatMessage() { content = "<b>Available commands:</b>\n\n" + list });
+            },
+            Summary = "Get the list of available commands."
+        });
+
+        SelfHelpCommands.Add(new SelfHelpCommand()
+        {
+            Command = "GetChatLog",
+            Executation = (args, conn) =>
+            {
+                ChatWindow.Instance.RequestFullChatLog(NetworkClient.localPlayer.GetComponent<GPTPlayer>());
+            },
+            Summary = "Get current user's chat log",
+        });
+
+        SelfHelpCommands.Add(new SelfHelpCommand()
+        {
+            Command = "ClearChatLog",
+            Executation = (args, conn) =>
+            {
+                ChatWindow.Instance.ClearChatLog(NetworkClient.localPlayer.GetComponent<GPTPlayer>());
+            },
+            Summary = "Clear current user's chat log. (WARNING: Cannot be undone.) "
+    });
+    }
+    #endregion
 
     #region Unity Callbacks
 
@@ -328,7 +376,9 @@ public class GPTNetworkManager : NetworkManager
     /// This is invoked when a server is started - including when a host is started.
     /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
     /// </summary>
-    public override void OnStartServer() { }
+    public override void OnStartServer() {
+        RegisterSelfHelpCommands();
+    }
 
     /// <summary>
     /// This is invoked when the client is started.

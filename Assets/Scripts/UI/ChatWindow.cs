@@ -6,7 +6,6 @@ using Mirror;
 using System.Linq;
 using TMPro;
 using System;
-using GluonGui.Dialog;
 using Newtonsoft.Json;
 
 public class ChatWindow : NetworkBehaviour
@@ -36,6 +35,19 @@ public class ChatWindow : NetworkBehaviour
     {
         if (!String.IsNullOrWhiteSpace(MessageInputField.text) && MessageInputField.interactable)
         {
+            //检测用户是否输入的是指令
+            if (MessageInputField.text.StartsWith("/"))
+            {
+                Debug.Log("[ChatWindow]Self-help command detected! Command:" + MessageInputField.text);
+                string command = MessageInputField.text.Substring(1).TrimEnd('\n'); // 去掉首个斜杠字符和末尾的换行符
+                string[] parts = command.Split(' ');
+                string commandName = parts[0];
+                string[] arguments = parts.Skip(1).ToArray();
+                SendSelfHelpCommand(NetworkClient.localPlayer.GetComponent<GPTPlayer>(), commandName, arguments);
+                Reset();
+                return;
+            }
+
             SendMessageToChatGPT(new GPTChatMessage()
             {
                 Sender = new GPTChatMessage.Who()
@@ -44,12 +56,26 @@ public class ChatWindow : NetworkBehaviour
                     Avatar = LocalPlayerInfo.Avatar.ToArray()
                 },
 
-                content = MessageInputField.text
+                content = MessageInputField.text.TrimEnd('\n')//去掉末尾的换行符
             });
             MessageInputField.interactable = false;
             SendMessageBtn.interactable = false;
             ChatGPTProcessingIndicator.SetActive(true);
             AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar.ToArray(), MessageInputField.text);
+        }
+    }
+
+    [Command(requiresAuthority = false)]
+    public void SendSelfHelpCommand(GPTPlayer applicant, string command, string[] param)
+    {
+        foreach (GPTNetworkManager.SelfHelpCommand obj in GPTNetworkManager.singleton.SelfHelpCommands)
+        {
+            if (obj.Command == command)
+            {
+                NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key;
+                if (conn != null)
+                    obj.Executation.Invoke(param, conn);
+            }
         }
     }
 
@@ -61,6 +87,7 @@ public class ChatWindow : NetworkBehaviour
         SendMessageBtn.onClick.AddListener(UI_SendMessageToServer);
         AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "You have joined " + GPTNetworkManager.singleton.networkAddress + ". ");
         SendMessageToServer(new GPTChatMessage { content = "Let's give <b>" + LocalPlayerInfo.Username + "</b> a really warm welcome! Hope you can enjoy your stay!" });
+        AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "You can type <b>/help</b> to see available commands.");
         LocalPlayerAvatar.texture = new Texture2D(1, 1);
         ImageConversion.LoadImage((Texture2D)LocalPlayerAvatar.texture, LocalPlayerInfo.Avatar.ToArray());
         Reset();
@@ -196,7 +223,7 @@ public class ChatWindow : NetworkBehaviour
             }
             catch
             {
-                ChatCompletion.Instance.chatRequestLogs.Add(new ChatCompletion.ChatRequestLog(){ history = new List<ChatMessage>(), sender = msg.Sender.Username });
+                ChatCompletion.Instance.chatRequestLogs.Add(new ChatCompletion.ChatRequestLog() { history = new List<ChatMessage>(), sender = msg.Sender.Username });
                 ChatCompletion.Instance.chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(null, msg.content, conn));
             }
 
@@ -226,8 +253,8 @@ public class ChatWindow : NetworkBehaviour
             string result = ChatCompletion.Instance.GetFullChatLog(applicant.Username);
             if (!string.IsNullOrEmpty(result))
             {
-                Debug.Log("[ChatWindow]Sending " + applicant.Username+"'s chat log to himself/herself.....");
-                OnReceiveFullChatLog(((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key,result);
+                Debug.Log("[ChatWindow]Sending " + applicant.Username + "'s chat log to himself/herself.....");
+                OnReceiveFullChatLog(((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key, result);
             }
             else
             {
@@ -258,7 +285,7 @@ public class ChatWindow : NetworkBehaviour
         //        AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar,msg.content);
         //    }
 
-        AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "--- MESSAGE(S) FROM CHAT LOG ---");
+        AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "<b>--- MESSAGE(S) FROM CHAT LOG ---</b>");
         for (int i = 1; i < result.Count; i++)
         {
             if (result[i].role.Equals("system", StringComparison.OrdinalIgnoreCase))
@@ -270,6 +297,16 @@ public class ChatWindow : NetworkBehaviour
                 AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar, result[i].content);
             }
         }
-        AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "--- END OF CHAT LOG ---");
+        AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "<b>--- END OF CHAT LOG ---</b>");
+    }
+
+    [Command(requiresAuthority = false)]
+    public void ClearChatLog(GPTPlayer applicant)
+    {
+        NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key;
+        if (conn != null)
+        {
+            ChatCompletion.Instance.ClearChatLog(applicant.Username);
+        }
     }
 }
