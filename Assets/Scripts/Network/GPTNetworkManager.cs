@@ -59,7 +59,7 @@ public class GPTNetworkManager : NetworkManager
             Command = "GetChatLog",
             Executation = (args, conn) =>
             {
-                ChatWindow.Instance.RequestFullChatLog(NetworkClient.localPlayer.GetComponent<GPTPlayer>());
+                ChatWindow.Instance.RequestFullChatLog(conn.identity.GetComponent<GPTPlayer>());
             },
             Summary = "Get current user's chat log",
         });
@@ -69,10 +69,10 @@ public class GPTNetworkManager : NetworkManager
             Command = "ClearChatLog",
             Executation = (args, conn) =>
             {
-                ChatWindow.Instance.ClearChatLog(NetworkClient.localPlayer.GetComponent<GPTPlayer>());
+                ChatWindow.Instance.ClearChatLog(conn.identity.GetComponent<GPTPlayer>());
             },
             Summary = "Clear current user's chat log. (WARNING: Cannot be undone.) "
-    });
+        });
     }
     #endregion
 
@@ -115,7 +115,7 @@ public class GPTNetworkManager : NetworkManager
         base.OnDestroy();
     }
 
-#endregion
+    #endregion
 
     #region Start & Stop
 
@@ -221,9 +221,12 @@ public class GPTNetworkManager : NetworkManager
     {
         base.OnServerDisconnect(conn);
         // remove player name from the HashSet
-            if (conn.authenticationData != null) { 
-                ((GPTNetworkAuthenticator)authenticator).UsersList.Remove(conn);}
-        Debug.Log("[GPTNetworkManager]" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "(" + conn.address + ") has disconnected from server.");
+        if (conn.authenticationData != null)
+        {
+            ((GPTNetworkAuthenticator)authenticator).UsersList.Remove(conn);
+            Debug.Log("[GPTNetworkManager]" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "(" + conn.address + ") has disconnected from server.");
+        }
+        Debug.Log("[GPTNetworkManager]" + conn.address + " has disconnected from server.");
     }
 
     /// <summary>
@@ -233,11 +236,12 @@ public class GPTNetworkManager : NetworkManager
     /// <param name="conn">Connection of the client...may be null</param>
     /// <param name="transportError">TransportError enum</param>
     /// <param name="message">String message of the error.</param>
-    public override void OnServerError(NetworkConnectionToClient conn, TransportError transportError, string message) {
+    public override void OnServerError(NetworkConnectionToClient conn, TransportError transportError, string message)
+    {
         if (conn != null)
-            Debug.LogError("[GPTNetworkManager]" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "(" + conn.address + ")'s transport has raised an error.\n" + transportError.ToString()+"\n"+message);
+            Debug.LogError("[GPTNetworkManager]" + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "(" + conn.address + ")'s transport has raised an error.\n" + transportError.ToString() + "\n" + message);
         else
-            Debug.LogError("[GPTNetworkManager]There was a critical error in server.\n" + transportError.ToString()+"\n"+message);
+            Debug.LogError("[GPTNetworkManager]There was a critical error in server.\n" + transportError.ToString() + "\n" + message);
     }
 
     #endregion
@@ -271,7 +275,7 @@ public class GPTNetworkManager : NetworkManager
         }
 
         MsgBoxManager.Instance.ShowMsgBox("You have been disconnected from server.", false);
-        
+
     }
 
     /// <summary>
@@ -304,43 +308,55 @@ public class GPTNetworkManager : NetworkManager
                     NetworkClient.Connect(networkAddress);
                     CurrentReconnectAttemptCounter++;
                     Debug.Log("[GPTNetworkAuthenticatior]Client is now reconnecting. (" + CurrentReconnectAttemptCounter + " of " + MaxReconnectAttempt + ")");
-                }else{
+                }
+                else
+                {
                     isReconnecting = false;
                     Debug.Log("[GPTNetworkAuthenticator]MaxReconnectAttempt reached! Reconnect failed!");
                     CurrentReconnectAttemptCounter = 0;
-                    MsgBoxManager.Instance.ShowMsgBox("We are sorry to inform you that we have lost the connection to the server due to <b>ping timeout or dead link</b>.\nWe will send ya back to the login screen.",false,(result) => {
+                    MsgBoxManager.Instance.ShowMsgBox("We are sorry to inform you that we have lost the connection to the server due to <b>ping timeout or dead link</b>.\nWe will send ya back to the login screen.", false, (result) =>
+                    {
                         LoginWindow.Instance.ShowLoginScreen();
                     });
                 }
             }
-        }else{
-            switch(transportError){
-                case TransportError.DnsResolve:{
-                    MsgBoxManager.Instance.ShowMsgBox("Could not connect to the server due to DNS Resolve Failure.\nPlease check the DNS server and server address.",false,(result) => {
-                        LoginWindow.Instance.ShowLoginScreen();
-                    });
+        }
+        else
+        {
+            switch (transportError)
+            {
+                case TransportError.DnsResolve:
+                    {
+                        MsgBoxManager.Instance.ShowMsgBox("Could not connect to the server due to DNS Resolve Failure.\nPlease check the DNS server and server address.", false, (result) =>
+                        {
+                            LoginWindow.Instance.ShowLoginScreen();
+                        });
                         isReconnecting = false;
                         CurrentReconnectAttemptCounter = 0;
                         break;
-                }
+                    }
 
-                case TransportError.Refused:{
-                    MsgBoxManager.Instance.ShowMsgBox("The server refused your connection.",false,(result) => {
-                        LoginWindow.Instance.ShowLoginScreen();
-                    });
+                case TransportError.Refused:
+                    {
+                        MsgBoxManager.Instance.ShowMsgBox("The server refused your connection.", false, (result) =>
+                        {
+                            LoginWindow.Instance.ShowLoginScreen();
+                        });
                         isReconnecting = false;
                         CurrentReconnectAttemptCounter = 0;
                         break;
-                }
+                    }
 
-                case TransportError.ConnectionClosed:{
-                    MsgBoxManager.Instance.ShowMsgBox("The connection was closed.",false,(result) => {
-                        LoginWindow.Instance.ShowLoginScreen();
-                    });
+                case TransportError.ConnectionClosed:
+                    {
+                        MsgBoxManager.Instance.ShowMsgBox("The connection was closed.", false, (result) =>
+                        {
+                            LoginWindow.Instance.ShowLoginScreen();
+                        });
                         isReconnecting = false;
                         CurrentReconnectAttemptCounter = 0;
                         break;
-                }
+                    }
 
                 default:
                     {
@@ -355,7 +371,7 @@ public class GPTNetworkManager : NetworkManager
             }
         }
 
-        
+
     }
 
     #endregion
@@ -376,7 +392,8 @@ public class GPTNetworkManager : NetworkManager
     /// This is invoked when a server is started - including when a host is started.
     /// <para>StartServer has multiple signatures, but they all cause this hook to be called.</para>
     /// </summary>
-    public override void OnStartServer() {
+    public override void OnStartServer()
+    {
         RegisterSelfHelpCommands();
     }
 
