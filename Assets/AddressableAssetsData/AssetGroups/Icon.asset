@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Icon
+  m_EditorClassIdentifier: 
+  m_GroupName: Icon
+  m_Data:
+    m_SerializedData: []
+  m_GUID: f1aa14c81e47f2b4fb9556a3db3b9f8d
+  m_SerializeEntries:
+  - m_GUID: e497370a9a9751e4a906a4a0c01d26a4
+    m_Address: unigpt_app
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: cda7555e74f326548b1e7995c23d5022
+    m_Address: announcement_icon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: d3f5f0c4d5703d74ea914b2587896b55
+    m_Address: default-avatar
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: caa357ca2f8565b438eaed38f0d3d717
+    m_Address: chatgpt_icon
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: d54ceed1de5bec94bbba025544af595d, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: e756547e4c5d3444bba8497abe0cac9e, type: 2}
+    - {fileID: 11400000, guid: 8cba22fe69ed43045b660cc11bb2f108, type: 2}

@@ -14,4 +14,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/ChatCompletion.unity
     guid: 71294636e0eb20d4f8e86696defd9b48
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.addressableassets: {fileID: 11400000, guid: d951839193289b84e88643838f5cc526, type: 2}
