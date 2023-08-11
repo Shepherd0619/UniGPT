@@ -7,6 +7,8 @@ using System.Linq;
 using TMPro;
 using System;
 using Newtonsoft.Json;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class ChatWindow : NetworkBehaviour
 {
@@ -21,6 +23,26 @@ public class ChatWindow : NetworkBehaviour
     private GPTNetworkAuthenticator.AuthRequestMessage LocalPlayerInfo;
 
     private bool isDragging = false;
+    AsyncOperationHandle<GameObject> handle;
+
+    private void Awake()
+    {
+        StartCoroutine(LoadAsset());
+    }
+
+    IEnumerator LoadAsset()
+    {
+        Debug.Log("[ChatWindow]Start loading asset.");
+        handle = Addressables.LoadAssetAsync<GameObject>("MessageUI");
+        yield return handle;
+        Debug.Log("[ChatWindow]Addressable loaded.");
+        ChatMessagePrefab = handle.Result;
+    }
+
+    private void OnDestroy()
+    {
+        Addressables.Release(handle);
+    }
 
     // Update is called once per frame
     void Update()

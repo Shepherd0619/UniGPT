@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
 public class MsgBoxManager : MonoBehaviour
@@ -9,9 +11,25 @@ public class MsgBoxManager : MonoBehaviour
     public GameObject Prefab;
     public List<MsgBox> MsgBoxes;
     public static MsgBoxManager Instance;
+    AsyncOperationHandle<GameObject> handle;
 
     private void Awake() {
         Instance = this;
+        
+    }
+
+    IEnumerator LoadAsset()
+    {
+        Debug.Log("[MsgBoxManager]Start loading asset.");
+        handle = Addressables.LoadAssetAsync<GameObject>("MessageBox");
+        yield return handle;
+        Debug.Log("[MsgBoxManager]Addressable loaded.");
+        Prefab = handle.Result;
+    }
+
+    private void OnDestroy()
+    {
+        Addressables.Release(handle);
     }
 
     // Start is called before the first frame update
