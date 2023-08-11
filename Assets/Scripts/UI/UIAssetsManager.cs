@@ -1,7 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
-using UnityEngine.UI;
+using UnityEngine.AddressableAssets;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 public class UIAssetsManager : MonoBehaviour
 {
@@ -13,6 +16,7 @@ public class UIAssetsManager : MonoBehaviour
     {
         public string Name;
         public Sprite Img;
+        public AsyncOperationHandle<Sprite> handle;
     }
 
     public static UIAssetsManager Instance;
@@ -20,6 +24,34 @@ public class UIAssetsManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
+        StartCoroutine(LoadAssets());
+    }
+
+    IEnumerator LoadAssets()
+    {
+        Debug.Log("[UIAssetsManager]Start loading Addressable.");
+        AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync("UI/Icon");
+        yield return handle;
+        Debug.Log("[UIAssetsManager]Addressable loaded.");
+        Icons.Clear();
+        foreach(IResourceLocation search in handle.Result)
+        {
+            if (Icons.Find(x => x.Name == search.PrimaryKey) == null)
+            {
+                AsyncOperationHandle<Sprite> spr = Addressables.LoadAssetAsync<Sprite>(search.PrimaryKey + "[" + Path.GetFileNameWithoutExtension(search.InternalId) + "]");
+                yield return spr;
+                Debug.Log("[UIAssetsManager]" + search.PrimaryKey + " loaded.");
+                Icons.Add(new ImageSet()
+                {
+                    Name = search.PrimaryKey,
+                    Img = spr.Result,
+                    handle = spr
+                });
+            }
+        }
+        Addressables.Release(handle);
+
+        //TODO: 加载其他类型的UI资源
     }
 
     // Start is called before the first frame update
@@ -47,5 +79,13 @@ public class UIAssetsManager : MonoBehaviour
         texture.Apply();
 
         return texture;
+    }
+
+    private void OnDestroy()
+    {
+        foreach(ImageSet image in Icons)
+        {
+            Addressables.Release(image.handle);
+        }
     }
 }

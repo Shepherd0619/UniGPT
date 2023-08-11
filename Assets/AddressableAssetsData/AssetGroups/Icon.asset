@@ -20,19 +20,23 @@ MonoBehaviour:
   - m_GUID: e497370a9a9751e4a906a4a0c01d26a4
     m_Address: unigpt_app
     m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: cda7555e74f326548b1e7995c23d5022
-    m_Address: announcement_icon
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: d3f5f0c4d5703d74ea914b2587896b55
-    m_Address: default-avatar
-    m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - UI/Icon
   - m_GUID: caa357ca2f8565b438eaed38f0d3d717
     m_Address: chatgpt_icon
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - UI/Icon
+  - m_GUID: d3f5f0c4d5703d74ea914b2587896b55
+    m_Address: default_avatar
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - UI/Icon
+  - m_GUID: cda7555e74f326548b1e7995c23d5022
+    m_Address: announcement_icon
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - UI/Icon
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d54ceed1de5bec94bbba025544af595d, type: 2}
   m_SchemaSet:

@@ -86,6 +86,7 @@ MonoBehaviour:
   m_LabelTable:
     m_LabelNames:
     - default
+    - UI/Icon
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: a9a2b6e0e58ab9e4b8bf0c66e9cce727, type: 2}
