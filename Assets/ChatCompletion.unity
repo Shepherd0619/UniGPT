@@ -2427,7 +2427,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 201052726}
   m_HandleRect: {fileID: 201052725}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -3495,7 +3495,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b4bb8f2857dbf24680ef269e8945d4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Prefab: {fileID: 6970305697199705451, guid: 208fa943f8cc5514ead65fef7436febc, type: 3}
+  Prefab: {fileID: 0}
   MsgBoxes: []
 --- !u!4 &639842336
 Transform:
@@ -4964,8 +4964,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 618336553}
   m_HandleRect: {fileID: 618336552}
   m_Direction: 2
-  m_Value: 1.000629
-  m_Size: 0.99976945
+  m_Value: 1
+  m_Size: 0.999995
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7348,13 +7348,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 69ef2e7c710383d41a7a60235e70d41f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Icons:
-  - Name: default-avatar
-    Img: {fileID: 21300000, guid: d3f5f0c4d5703d74ea914b2587896b55, type: 3}
-  - Name: chatgpt_icon
-    Img: {fileID: 21300000, guid: caa357ca2f8565b438eaed38f0d3d717, type: 3}
-  - Name: announcement_icon
-    Img: {fileID: 21300000, guid: cda7555e74f326548b1e7995c23d5022, type: 3}
+  Icons: []
   Backgrounds: []
   Emojis: []
 --- !u!4 &1136516959
@@ -8119,7 +8113,7 @@ MonoBehaviour:
   syncInterval: 0
   ChatWindowContainer: {fileID: 1272184635}
   ChatContainer: {fileID: 1351122720}
-  ChatMessagePrefab: {fileID: 9034106224001298501, guid: 3b4082d9b167fb44584c01d3b9c32ff0, type: 3}
+  ChatMessagePrefab: {fileID: 0}
   MessageInputField: {fileID: 714193169}
   LocalPlayerAvatar: {fileID: 302526187}
   SendMessageBtn: {fileID: 1374515103}
@@ -11974,7 +11968,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0.000013877188}
+  m_AnchoredPosition: {x: 0, y: -0.000009629753}
   m_SizeDelta: {x: 0, y: 841.82}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1896642589

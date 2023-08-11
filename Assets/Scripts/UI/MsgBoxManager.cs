@@ -15,7 +15,7 @@ public class MsgBoxManager : MonoBehaviour
 
     private void Awake() {
         Instance = this;
-        
+        StartCoroutine(LoadAsset());
     }
 
     IEnumerator LoadAsset()
