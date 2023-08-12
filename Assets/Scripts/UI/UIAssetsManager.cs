@@ -52,6 +52,11 @@ public class UIAssetsManager : MonoBehaviour
         Addressables.Release(handle);
 
         //TODO: 加载其他类型的UI资源
+        Debug.Log("[ChatWindow]Start loading asset.");
+        AsyncOperationHandle<GameObject> ChatMessagePrefabHandle = Addressables.LoadAssetAsync<GameObject>("MessageUI");
+        yield return ChatMessagePrefabHandle;
+        Debug.Log("[ChatWindow]Addressable loaded.");
+        ChatWindow.Instance.ChatMessagePrefab = ChatMessagePrefabHandle.Result;
     }
 
     // Start is called before the first frame update

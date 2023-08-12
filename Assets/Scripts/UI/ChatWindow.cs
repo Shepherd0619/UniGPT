@@ -27,16 +27,7 @@ public class ChatWindow : NetworkBehaviour
 
     private void Awake()
     {
-        StartCoroutine(LoadAsset());
-    }
-
-    IEnumerator LoadAsset()
-    {
-        Debug.Log("[ChatWindow]Start loading asset.");
-        handle = Addressables.LoadAssetAsync<GameObject>("MessageUI");
-        yield return handle;
-        Debug.Log("[ChatWindow]Addressable loaded.");
-        ChatMessagePrefab = handle.Result;
+        Instance = this;
     }
 
     private void OnDestroy()
@@ -105,7 +96,7 @@ public class ChatWindow : NetworkBehaviour
     {
         base.OnStartClient();
         LocalPlayerInfo = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).ClientInfo;
-        Instance = this;
+        //Instance = this;
         SendMessageBtn.onClick.AddListener(UI_SendMessageToServer);
         AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "You have joined " + GPTNetworkManager.singleton.networkAddress + ". ");
         SendMessageToServer(new GPTChatMessage { content = "Let's give <b>" + LocalPlayerInfo.Username + "</b> a really warm welcome! Hope you can enjoy your stay!" });
