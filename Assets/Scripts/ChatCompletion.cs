@@ -1,14 +1,11 @@
+using Mirror;
+using Newtonsoft.Json;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using System.Net.Http;
-using System.Text;
-using Newtonsoft.Json;
-using Mirror;
-using UnityEngine.Networking;
-using System.Linq;
 using System.IO;
-using System;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.Networking;
 
 public class ChatCompletion : MonoBehaviour
 {
@@ -112,11 +109,14 @@ public class ChatCompletion : MonoBehaviour
             // ...
             GPTNetworkAuthenticator.AuthRequestMessage result;
             ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.TryGetValue(conn, out result);
-            try{
+            try
+            {
                 ChatCompletion.ChatRequestLog x = chatRequestLogs.FirstOrDefault(x => x.sender == result.Username);
-                msgs.Add(new ChatMessage(){ role = "system", content = responseData.choices[0].message.content });
+                msgs.Add(new ChatMessage() { role = "system", content = responseData.choices[0].message.content });
                 x.history = msgs;
-            }catch{
+            }
+            catch
+            {
                 Debug.LogWarning("[ChatCompletion]Could not find " + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "'s chat log. The user or server may clear it during this request.");
             }
             ChatRequestResponseCallback(responseData, conn);
@@ -168,7 +168,7 @@ public class ChatCompletion : MonoBehaviour
         //}
 
         //Debug.LogWarning("[ChatCompletion]Could not get " + username + "'s full chat log in server's realtime chat log list. User may be newbie or want to retrieve the local copy?");
-        
+
         string filePath = Application.persistentDataPath + "/GPTChatLog_" + username + ".json";
 
         if (File.Exists(filePath))
@@ -189,7 +189,7 @@ public class ChatCompletion : MonoBehaviour
             if (log.sender == username)
             {
                 log.history.Clear();
-                Debug.Log("[ChatCompletion]Successfully cleared "+ username +"'s realtime chat log.");
+                Debug.Log("[ChatCompletion]Successfully cleared " + username + "'s realtime chat log.");
                 break;
             }
         }
@@ -208,19 +208,19 @@ public class ChatCompletion : MonoBehaviour
 
     public void LoadChatLogFromDisk(string username)
     {
-        Debug.Log("[ChatCompletion]Start loading "+ username +"'s chat log from disk.");
+        Debug.Log("[ChatCompletion]Start loading " + username + "'s chat log from disk.");
         string directoryPath = Application.persistentDataPath;
 
         string searchPattern = $"GPTChatLog_{username}.json";
         string[] files = Directory.GetFiles(directoryPath, searchPattern);
 
-        if(files.Count() > 0)
+        if (files.Count() > 0)
         {
             Debug.Log("[ChatCompletion]Mounting " + username + "'s chat log to realtime, stand by...");
             List<ChatMessage> result = JsonConvert.DeserializeObject<List<ChatMessage>>(File.ReadAllText(files[0]));
-            foreach(ChatRequestLog log in chatRequestLogs)
+            foreach (ChatRequestLog log in chatRequestLogs)
             {
-                if(log.sender == username)
+                if (log.sender == username)
                 {
                     log.history = result;
                     return;

@@ -3,9 +3,8 @@
 //*							Written by Grady Featherstone								*
 //										?Copyright 2011										*
 //*******************************************************************************
-using System;
-using UnityEngine;
 using Mirror;
+using UnityEngine;
 public class PauseMenu : MonoBehaviour
 {
     public Font pauseMenuFont;

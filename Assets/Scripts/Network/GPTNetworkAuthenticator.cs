@@ -1,7 +1,7 @@
+using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Mirror;
 using UnityEngine;
 /*
     Documentation: https://mirror-networking.gitbook.io/docs/components/network-authenticators
@@ -50,9 +50,11 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
         public string requestResponseMessage;
     }
 
-    public struct KickPlayerMessage : NetworkMessage{
+    public struct KickPlayerMessage : NetworkMessage
+    {
         public ReasonID Reason;
-        public enum ReasonID{
+        public enum ReasonID
+        {
             None,
             Violation,
             ServerError,
@@ -106,7 +108,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
         }
         else
         {
-            foreach(string black in ForbiddenNickName)
+            foreach (string black in ForbiddenNickName)
             {
                 if (msg.Username.Contains(black, StringComparison.OrdinalIgnoreCase))
                 {
@@ -125,7 +127,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                 if (conn.address == GPTNetworkManager.singleton.networkAddress)
                 {
                     //目前Admin只能为本机用户，Moderator可以后设置。
-                    Debug.Log("[GPTNetworkAuthenticator]Admin has connected to the server! Username: "+msg.Username);
+                    Debug.Log("[GPTNetworkAuthenticator]Admin has connected to the server! Username: " + msg.Username);
                     authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Success;
                     conn.authenticationData = msg;
                     conn.Send(authResponseMessage);
@@ -135,7 +137,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                     // Accept the successful authentication
                     ServerAccept(conn);
 
-                    
+
                     Debug.Log("[GPTNetworkAuthenticator]Statistics of online users:" + UsersList.Count);
 
                     //ChatWindow.Instance.OnReceiveServerMessage(new GPTChatMessage{ content = "A wild server admin just jumped right in! "+msg.Username });
@@ -153,9 +155,9 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
             }
             else
             {
-                foreach(AuthRequestMessage search in UsersList.Values)
+                foreach (AuthRequestMessage search in UsersList.Values)
                 {
-                    if(search.Username == msg.Username)
+                    if (search.Username == msg.Username)
                     {
                         authResponseMessage.requestResponseCode = AuthResponseMessage.Status.Error;
                         authResponseMessage.requestResponseMessage = "Change the username";
@@ -176,8 +178,8 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                 // Accept the successful authentication
                 ServerAccept(conn);
 
-                
-                Debug.Log("{GPTNetworkAuthenticator]"+msg.Username+" ("+conn.address+") has joined the server.");
+
+                Debug.Log("{GPTNetworkAuthenticator]" + msg.Username + " (" + conn.address + ") has joined the server.");
                 Debug.Log("[GPTNetworkAuthenticator]Statistics of online users:" + UsersList.Count);
 
                 //ChatWindow.Instance.OnReceiveServerMessage(new GPTChatMessage{ content = "Let's give "+msg.Username+" a really warm welcome! Hope you can enjoy your stay!" });
@@ -204,8 +206,9 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
     ///<summary>
     ///服务器踢出用户
     ///</summary>
-    public void KickPlayer(NetworkConnectionToClient conn, string msg, KickPlayerMessage.ReasonID reason = KickPlayerMessage.ReasonID.None){
-        conn.Send(new KickPlayerMessage(){ Reason = reason, Message =  msg });
+    public void KickPlayer(NetworkConnectionToClient conn, string msg, KickPlayerMessage.ReasonID reason = KickPlayerMessage.ReasonID.None)
+    {
+        conn.Send(new KickPlayerMessage() { Reason = reason, Message = msg });
         StartCoroutine(DelayedDisconnect(conn, 1f));
     }
 
@@ -274,7 +277,8 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
     ///客户端接收到踢出信息时要做出的反应
     ///不建议在这里头用客户端那头的断开连接函数，可能会有意料之外的情况。
     ///</summary>
-    public void OnKickPlayerMessage(KickPlayerMessage msg){
+    public void OnKickPlayerMessage(KickPlayerMessage msg)
+    {
         string MsgBoxText = "You have been removed from the server due to\n";
         switch (msg.Reason)
         {
@@ -298,7 +302,7 @@ public class GPTNetworkAuthenticator : NetworkAuthenticator
                 break;
         }
 
-        if(!String.IsNullOrEmpty(msg.Message) && !String.IsNullOrWhiteSpace(msg.Message))
+        if (!String.IsNullOrEmpty(msg.Message) && !String.IsNullOrWhiteSpace(msg.Message))
             MsgBoxText += "\nPlease refer to the following detailed message: " + msg.Message;
 
         ChatWindow.Instance.AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), MsgBoxText);

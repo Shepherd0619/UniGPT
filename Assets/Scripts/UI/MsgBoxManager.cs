@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
-using UnityEngine.UI;
 
 public class MsgBoxManager : MonoBehaviour
 {
@@ -13,7 +12,8 @@ public class MsgBoxManager : MonoBehaviour
     public static MsgBoxManager Instance;
     AsyncOperationHandle<GameObject> handle;
 
-    private void Awake() {
+    private void Awake()
+    {
         Instance = this;
         StartCoroutine(LoadAsset());
     }
@@ -35,19 +35,20 @@ public class MsgBoxManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    public void ShowMsgBox(string content, bool hasCancelButton, Action<bool> result = null){
+    public void ShowMsgBox(string content, bool hasCancelButton, Action<bool> result = null)
+    {
         GameObject prefab = Instantiate(Prefab, GameObject.FindObjectOfType<Canvas>().transform);
         MsgBox msgBox = prefab.GetComponent<MsgBox>();
-        msgBox.ShowMsgBox(content,hasCancelButton,result);
+        msgBox.ShowMsgBox(content, hasCancelButton, result);
         MsgBoxes.Add(msgBox);
     }
 
@@ -70,7 +71,8 @@ public class MsgBoxManager : MonoBehaviour
         MsgBoxes.RemoveAt(msgBoxId);
     }
 
-    public void RemoveMsgBox(MsgBox msgBox){
+    public void RemoveMsgBox(MsgBox msgBox)
+    {
         MsgBoxes.Remove(msgBox);
         Destroy(msgBox.gameObject);
     }

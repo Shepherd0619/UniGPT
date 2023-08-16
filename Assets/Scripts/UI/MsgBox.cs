@@ -1,7 +1,7 @@
 using System;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 public class MsgBox : MonoBehaviour
 {
     public TMP_Text contentText;
@@ -11,7 +11,8 @@ public class MsgBox : MonoBehaviour
 
     public Action<bool> callback; // 回调函数，用于返回用户的操作结果
 
-    private void Awake() {
+    private void Awake()
+    {
         confirmButton.GetComponent<Button>().onClick.AddListener(ConfirmButtonClicked);
         cancelButton.GetComponent<Button>().onClick.AddListener(CancelButtonClicked);
     }
@@ -28,10 +29,13 @@ public class MsgBox : MonoBehaviour
         // 根据是否有取消按钮来显示或隐藏取消按钮
         cancelButton.SetActive(hasCancelButton);
 
-        if(hasCancelButton){
-            confirmButton.transform.localPosition = new Vector3(-170.0f, confirmButton.transform.localPosition.y,confirmButton.transform.localPosition.z);
-        }else{
-            confirmButton.transform.localPosition = new Vector3(0.0f, confirmButton.transform.localPosition.y,confirmButton.transform.localPosition.z);
+        if (hasCancelButton)
+        {
+            confirmButton.transform.localPosition = new Vector3(-170.0f, confirmButton.transform.localPosition.y, confirmButton.transform.localPosition.z);
+        }
+        else
+        {
+            confirmButton.transform.localPosition = new Vector3(0.0f, confirmButton.transform.localPosition.y, confirmButton.transform.localPosition.z);
         }
 
         //保存回调函数

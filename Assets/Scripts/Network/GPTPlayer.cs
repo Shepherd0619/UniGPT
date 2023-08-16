@@ -1,8 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using Mirror;
-using UnityEngine.UI;
 public class GPTPlayer : NetworkBehaviour
 {
     [SyncVar]
@@ -12,10 +8,11 @@ public class GPTPlayer : NetworkBehaviour
     public GPTNetworkAuthenticator.AuthRequestMessage.Role UserRole;
 
     public override void OnStartServer()
-    {   
+    {
         Username = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Username;
         Avatar.Clear();
-        foreach(byte data in ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Avatar){
+        foreach (byte data in ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).Avatar)
+        {
             Avatar.Add(data);
         }
         UserRole = ((GPTNetworkAuthenticator.AuthRequestMessage)connectionToClient.authenticationData).UserRole;

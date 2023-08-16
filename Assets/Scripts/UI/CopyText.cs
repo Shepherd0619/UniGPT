@@ -1,6 +1,6 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using TMPro;
 
 public class CopyText : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler, IEndDragHandler
 {
@@ -20,7 +20,7 @@ public class CopyText : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        startIndex = TMP_TextUtilities.FindIntersectingCharacter(textComponent, eventData.position,null, true);
+        startIndex = TMP_TextUtilities.FindIntersectingCharacter(textComponent, eventData.position, null, true);
         isDragging = true;
     }
 
@@ -86,7 +86,7 @@ public class CopyText : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, I
         {
             TMP_MeshInfo meshInfo = textInfo.meshInfo[i];
             Color32[] vertexColors = meshInfo.colors32;
-            for (int j = 0;j < meshInfo.vertexCount; j++)
+            for (int j = 0; j < meshInfo.vertexCount; j++)
             {
                 vertexColors[j] = originalColor;
             }

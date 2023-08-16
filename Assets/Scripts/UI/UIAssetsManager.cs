@@ -34,7 +34,7 @@ public class UIAssetsManager : MonoBehaviour
         yield return handle;
         Debug.Log("[UIAssetsManager]Addressable loaded.");
         Icons.Clear();
-        foreach(IResourceLocation search in handle.Result)
+        foreach (IResourceLocation search in handle.Result)
         {
             if (Icons.Find(x => x.Name == search.PrimaryKey) == null)
             {
@@ -88,7 +88,7 @@ public class UIAssetsManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        foreach(ImageSet image in Icons)
+        foreach (ImageSet image in Icons)
         {
             Addressables.Release(image.handle);
         }

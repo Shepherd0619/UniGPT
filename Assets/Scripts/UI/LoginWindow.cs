@@ -1,13 +1,11 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using UnityEngine.Networking;
+using Mirror;
 using Newtonsoft.Json;
 using System;
-using Mirror;
-using System.IO;
+using System.Collections;
+using TMPro;
+using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class LoginWindow : MonoBehaviour
 {
@@ -111,7 +109,7 @@ public class LoginWindow : MonoBehaviour
     IEnumerator LoadLocalData(string filePath)
     {
         Texture2D texture = new Texture2D(1, 1);
-        texture.LoadImage(NativeGallery.LoadImageAtPath(filePath,128,false).EncodeToPNG());
+        texture.LoadImage(NativeGallery.LoadImageAtPath(filePath, 128, false).EncodeToPNG());
         Debug.Log("LoadImage complete!");
         if (texture.EncodeToPNG().Length / 1024 > 100)
         {
@@ -171,7 +169,8 @@ public class LoginWindow : MonoBehaviour
             return;
         }
         SetAuthRequestMessage(true);
-        HostWindow.Instance.ShowConfigWindow(()=>{
+        HostWindow.Instance.ShowConfigWindow(() =>
+        {
             if (NetworkServer.active)
             {
                 MsgBoxManager.Instance.ShowMsgBox("There is a server running in the background.\n Continuing to start the host will force shutdown the running server.\n\nProceed?", true, (result) =>
@@ -181,10 +180,10 @@ public class LoginWindow : MonoBehaviour
                         GPTNetworkManager.singleton.StopHost();
                     }
                 });
-                
+
             }
             GPTNetworkManager.singleton.StartHost();
-        }, null,true);
+        }, null, true);
         //GPTNetworkManager.singleton.StartHost();
     }
 
@@ -193,7 +192,7 @@ public class LoginWindow : MonoBehaviour
         ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).ClientInfo = new GPTNetworkAuthenticator.AuthRequestMessage()
         {
             Username = Username.text,
-            Avatar = Avatar.texture?ImageConversion.EncodeToPNG((Texture2D)Avatar.texture):ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("default-avatar")),
+            Avatar = Avatar.texture ? ImageConversion.EncodeToPNG((Texture2D)Avatar.texture) : ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("default-avatar")),
             UserRole = isAdmin ? GPTNetworkAuthenticator.AuthRequestMessage.Role.Admin : GPTNetworkAuthenticator.AuthRequestMessage.Role.User
         };
     }

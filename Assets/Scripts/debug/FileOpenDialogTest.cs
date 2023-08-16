@@ -1,9 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
+using Newtonsoft.Json;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using Newtonsoft.Json;
 
 public class FileOpenDialogTest : MonoBehaviour
 {
@@ -18,14 +16,16 @@ public class FileOpenDialogTest : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
-    void OpenFileDialog(){
+    void OpenFileDialog()
+    {
         FileOpenDialog.Instance.OpenFileDialog(OnFileSelected);
     }
 
-    void OnFileSelected(string data){
+    void OnFileSelected(string data)
+    {
         txt.text = JsonConvert.DeserializeObject<FileOpenDialog.FileInfo>(data).Filename;
     }
 }

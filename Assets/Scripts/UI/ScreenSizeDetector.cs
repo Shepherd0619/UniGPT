@@ -25,7 +25,8 @@ public class ScreenSizeDetector : MonoBehaviour
                 // 屏幕尺寸发生了修改，执行对应的操作
                 // ...
                 Debug.Log("Screen size change detected! " + Screen.currentResolution);
-                foreach(GameObject obj in Listeners){
+                foreach (GameObject obj in Listeners)
+                {
                     obj.SendMessage("OnScreenSizeChanged");
                 }
                 // 更新记录的屏幕尺寸

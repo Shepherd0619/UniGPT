@@ -1,9 +1,8 @@
 using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
 {
@@ -33,7 +32,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
         orgSize = rectTransform.sizeDelta;
         ScreenSizeDetector.Instance.Listeners.Add(gameObject);
         StartCoroutine(LateStart());
-        
+
     }
 
     // Update is called once per frame
@@ -54,12 +53,12 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
 
     public void AppendMessage(string name, byte[] avatar, string message)
     {
-        Avatar.texture = new Texture2D(1,1);
-        ImageConversion.LoadImage((Texture2D)Avatar.texture,avatar);
+        Avatar.texture = new Texture2D(1, 1);
+        ImageConversion.LoadImage((Texture2D)Avatar.texture, avatar);
         Name = name;
         Message = message;
 
-        messageText.text = "<b>"+name+"</b>\n\n"+message;
+        messageText.text = "<b>" + name + "</b>\n\n" + message;
 
         GetComponent<CodeSnippetHighlighter>().FormatAndHighlightCode(messageText);
     }
@@ -120,7 +119,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
 
     private void ShowContextMenu(Vector2 position)
     {
-        if(realtimeMenuUI != null)
+        if (realtimeMenuUI != null)
         {
             Destroy(realtimeMenuUI);
 
@@ -131,7 +130,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
         realtimeMenuUI.SetActive(true);
     }
 
-    private void ExecuteDefaultClick()  
+    private void ExecuteDefaultClick()
     {
         // 执行默认的点击操作
         Debug.Log("Default click action");

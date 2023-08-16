@@ -1,11 +1,11 @@
-using UnityEngine;
-using System;
-using System.IO;
-using System.Collections;
-using UnityEngine.Networking;
 using Newtonsoft.Json;
-using System.Runtime.InteropServices;
 using SFB;
+using System;
+using System.Collections;
+using System.IO;
+using System.Runtime.InteropServices;
+using UnityEngine;
+using UnityEngine.Networking;
 
 public class FileOpenDialog : MonoBehaviour
 {
