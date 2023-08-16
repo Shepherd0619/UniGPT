@@ -1,10 +1,27 @@
-using UnityEngine;
 using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 
 public class TextContextMenu : MonoBehaviour
 {
+    public Button CopyBtn;
+    public Button PasteBtn;
+    public Button ShareBtn;
+
     private TMP_Text ui_text;
     private bool isReadOnly = false;
+
+    public void Initialize()
+    {
+#if UNITY_ANDROID || UNITY_IOS
+        ShareBtn.gameObject.SetActive(true);
+#else
+        ShareBtn.gameObject.SetActive(false);
+#endif
+
+        PasteBtn.gameObject.SetActive(!isReadOnly);
+        CopyBtn.gameObject.SetActive(true);
+    }
 
     public virtual void CopyText()
     {
