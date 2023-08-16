@@ -39,6 +39,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
     // Update is called once per frame
     void Update()
     {
+#if UNITY_ANDROID || UNITY_IOS
         if (isPointerDown)
         {
             pointerDownTimer += Time.deltaTime;
@@ -48,6 +49,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
                 ShowContextMenu(eventData.position);
             }
         }
+#endif
     }
 
     public void AppendMessage(string name, byte[] avatar, string message)
@@ -103,6 +105,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
 
     public void OnPointerUp(PointerEventData eventData)
     {
+#if UNITY_IOS || UNITY_ANDROID
         if (eventData.button == PointerEventData.InputButton.Left)
         {
             isPointerDown = false;
@@ -112,6 +115,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
                 ExecuteDefaultClick();
             }
         }
+#endif
     }
 
     private void ShowContextMenu(Vector2 position)
@@ -127,7 +131,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
         realtimeMenuUI.SetActive(true);
     }
 
-    private void ExecuteDefaultClick()
+    private void ExecuteDefaultClick()  
     {
         // 执行默认的点击操作
         Debug.Log("Default click action");

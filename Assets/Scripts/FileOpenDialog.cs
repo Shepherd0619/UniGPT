@@ -1,6 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 using System;
 using System.IO;
 using System.Collections;
@@ -8,7 +6,6 @@ using UnityEngine.Networking;
 using Newtonsoft.Json;
 using System.Runtime.InteropServices;
 using SFB;
-using System.Windows.Forms;
 
 public class FileOpenDialog : MonoBehaviour
 {
