@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-public class MessageUI : MonoBehaviour
+using UnityEngine.EventSystems;
+
+public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
 {
     public RawImage Avatar;
     public string Name;
@@ -14,6 +16,15 @@ public class MessageUI : MonoBehaviour
     private RectTransform rectTransform;
     private RectTransform scrollTransform;
     private Vector2 orgSize;
+
+    private bool isPointerDown = false;
+    private float pointerDownTimer = 0f;
+    private float requiredHoldTime = 0.5f; // 定义长按所需的时间
+
+    public GameObject menuUI;
+
+    public static GameObject realtimeMenuUI;
+    PointerEventData eventData;
 
     void Start()
     {
@@ -28,7 +39,15 @@ public class MessageUI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        if (isPointerDown)
+        {
+            pointerDownTimer += Time.deltaTime;
+            if (pointerDownTimer >= requiredHoldTime)
+            {
+                // 如果时间达到要求，显示右键菜单或执行复制操作
+                ShowContextMenu(eventData.position);
+            }
+        }
     }
 
     public void AppendMessage(string name, byte[] avatar, string message)
@@ -61,5 +80,56 @@ public class MessageUI : MonoBehaviour
         rectTransform.sizeDelta = new Vector2(orgSize.x, ContentSize.y + orgSize.y);
         LayoutRebuilder.MarkLayoutForRebuild(rectTransform.parent as RectTransform);
         LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform.parent as RectTransform);
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Right)
+        {
+            // 点击右键时显示右键菜单
+            ShowContextMenu(eventData.position);
+        }
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            isPointerDown = true;
+            pointerDownTimer = 0f;
+            this.eventData = eventData;
+        }
+    }
+
+    public void OnPointerUp(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            isPointerDown = false;
+            if (pointerDownTimer < requiredHoldTime)
+            {
+                // 如果时间不足，执行默认的点击操作
+                ExecuteDefaultClick();
+            }
+        }
+    }
+
+    private void ShowContextMenu(Vector2 position)
+    {
+        if(realtimeMenuUI != null)
+        {
+            Destroy(realtimeMenuUI);
+
+        }
+        realtimeMenuUI = Instantiate(menuUI, transform);
+        realtimeMenuUI.transform.position = position;
+        // 显示右键菜单
+        realtimeMenuUI.SetActive(true);
+    }
+
+    private void ExecuteDefaultClick()
+    {
+        // 执行默认的点击操作
+        Debug.Log("Default click action");
     }
 }
