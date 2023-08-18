@@ -96,6 +96,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
+            HideContextMenu();
             isPointerDown = true;
             pointerDownTimer = 0f;
             this.eventData = eventData;
@@ -122,12 +123,20 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
         if (realtimeMenuUI != null)
         {
             Destroy(realtimeMenuUI);
-
         }
         realtimeMenuUI = Instantiate(menuUI, transform);
         realtimeMenuUI.transform.position = position;
         // 显示右键菜单
         realtimeMenuUI.SetActive(true);
+        realtimeMenuUI.GetComponent<TextContextMenu>().Initialize(messageText);
+    }
+
+    private void HideContextMenu()
+    {
+        if (realtimeMenuUI != null)
+        {
+            Destroy(realtimeMenuUI);
+        }
     }
 
     private void ExecuteDefaultClick()

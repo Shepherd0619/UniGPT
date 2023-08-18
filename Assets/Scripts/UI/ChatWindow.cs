@@ -7,10 +7,11 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.EventSystems;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.UI;
 
-public class ChatWindow : NetworkBehaviour
+public class ChatWindow : NetworkBehaviour, IPointerDownHandler
 {
     public GameObject ChatWindowContainer;
     public ScrollRect ChatContainer;
@@ -153,6 +154,17 @@ public class ChatWindow : NetworkBehaviour
     public void OnEndDrag()
     {
         isDragging = false;
+    }
+
+    public void OnPointerDown(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            if(TextContextMenu.Instance != null)
+            {
+                TextContextMenu.Instance.SelfDestruction();
+            }
+        }
     }
 
     [ClientRpc]

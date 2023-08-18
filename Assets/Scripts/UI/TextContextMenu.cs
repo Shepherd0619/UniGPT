@@ -10,9 +10,12 @@ public class TextContextMenu : MonoBehaviour
 
     private TMP_Text ui_text;
     private bool isReadOnly = false;
+    public static TextContextMenu Instance;
 
-    public void Initialize()
+    public void Initialize(TMP_Text _Text)
     {
+        Instance = this;
+        ui_text = _Text;
 #if UNITY_ANDROID || UNITY_IOS
         ShareBtn.gameObject.SetActive(true);
 #else
@@ -21,17 +24,36 @@ public class TextContextMenu : MonoBehaviour
 
         PasteBtn.gameObject.SetActive(!isReadOnly);
         CopyBtn.gameObject.SetActive(true);
+
+        CopyBtn.onClick.RemoveAllListeners();
+        CopyBtn.onClick.AddListener(CopyText);
+
+        PasteBtn.onClick.RemoveAllListeners();
+        if (!isReadOnly)
+            PasteBtn.onClick.AddListener(PasteText);
+
+        ShareBtn.onClick.AddListener(ShareText);
+    }
+
+    public void SelfDestruction()
+    {
+        Instance = null;
+        Destroy(gameObject);
     }
 
     public virtual void CopyText()
     {
         GUIUtility.systemCopyBuffer = ui_text.text;
+
+        SelfDestruction();
     }
 
     public virtual void PasteText()
     {
         if (!isReadOnly)
             ui_text.text = GUIUtility.systemCopyBuffer;
+
+        SelfDestruction();
     }
 
     public virtual void ShareText()
@@ -43,5 +65,7 @@ public class TextContextMenu : MonoBehaviour
         share.SetUrl("https://shepherd0619.github.io/");
         share.Share();
 #endif
+
+        SelfDestruction();
     }
 }
