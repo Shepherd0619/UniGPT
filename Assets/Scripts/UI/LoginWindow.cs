@@ -142,7 +142,13 @@ public class LoginWindow : MonoBehaviour
         if (NetworkClient.active)
             GPTNetworkManager.singleton.StopClient();
         GPTNetworkManager.singleton.StartClient();
-        msgboxId = MsgBoxManager.Instance.ShowMsgBoxNonInteractable("Connecting to " + GPTNetworkManager.singleton.networkAddress, true, null);
+        msgboxId = MsgBoxManager.Instance.ShowMsgBoxNonInteractable("Connecting to " + GPTNetworkManager.singleton.networkAddress, true, (result) =>
+        {
+            if (!result)
+            {
+                GPTNetworkManager.singleton.StopClient();
+            }
+        });
         StartCoroutine(ConnectingToServer());
     }
 

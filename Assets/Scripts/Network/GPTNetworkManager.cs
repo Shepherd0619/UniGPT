@@ -24,6 +24,8 @@ public class GPTNetworkManager : NetworkManager
         public Action<string[], NetworkConnection> Executation;
         public string Summary;
     }
+
+    private int msgboxId;
     /// <summary>
     /// Runs on both Server and Client
     /// Networking is NOT initialized when this fires
@@ -298,6 +300,13 @@ public class GPTNetworkManager : NetworkManager
                 NetworkClient.Connect(networkAddress);
                 CurrentReconnectAttemptCounter++;
                 Debug.Log("[GPTNetworkAuthenticatior]Client is now reconnecting. (" + CurrentReconnectAttemptCounter + " of " + MaxReconnectAttempt + ")");
+                msgboxId = MsgBoxManager.Instance.ShowMsgBoxNonInteractable("There is a timeout or dead link in this connection.\nReconnecting to " + GPTNetworkManager.singleton.networkAddress+"......", true, (result) =>
+                {
+                    if (!result)
+                    {
+                        GPTNetworkManager.singleton.StopClient();
+                    }
+                });
             }
             else
             {
@@ -310,6 +319,7 @@ public class GPTNetworkManager : NetworkManager
                 else
                 {
                     isReconnecting = false;
+                    MsgBoxManager.Instance.RemoveNonInteractableMsgBox(msgboxId,true);
                     Debug.Log("[GPTNetworkAuthenticator]MaxReconnectAttempt reached! Reconnect failed!");
                     CurrentReconnectAttemptCounter = 0;
                     MsgBoxManager.Instance.ShowMsgBox("We are sorry to inform you that we have lost the connection to the server due to <b>ping timeout or dead link</b>.\nWe will send ya back to the login screen.", false, (result) =>
@@ -415,5 +425,15 @@ public class GPTNetworkManager : NetworkManager
     /// </summary>
     public override void OnStopClient() { }
 
+    #endregion
+
+    #region GUI
+    public void OnGUI()
+    {
+        if (isReconnecting)
+        {
+            GUI.Label(new Rect(10, 10, 300, 30), "<color=red>WARNING: CONNECTION PROBLEM</color>");
+        }
+    }
     #endregion
 }
