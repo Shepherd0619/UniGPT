@@ -32,6 +32,22 @@ public class UIAssetsManager : MonoBehaviour
         Debug.Log("[UIAssetsManager]Start loading Addressable.");
         AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync("UI/Icon");
         yield return handle;
+        if(handle.Status == AsyncOperationStatus.Failed)
+        {
+            MsgBoxManager.Instance.ShowMsgBox("Failed to load resources. Please verify the installation.\nIf this is the first time you encountered such issue, please click Confirm.\nIf not, please click Cancel to quit and reinstall the app.",true, (result) =>
+            {
+                if (result)
+                {
+                    StartCoroutine(LoadAssets());
+                }
+                else
+                {
+                    Application.Quit();
+                }
+            });
+
+        }
+
         Debug.Log("[UIAssetsManager]Addressable loaded.");
         Icons.Clear();
         foreach (IResourceLocation search in handle.Result)

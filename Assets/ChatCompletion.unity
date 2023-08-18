@@ -3059,7 +3059,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &536174445
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4542,22 +4542,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ConfigWindow: {fileID: 580642340}
-  UI_ConfigBools:
-  - Config:
-      Name: AcceptWebGL
-      Value: 0
-      Default: 1
-    UI: {fileID: 1873565889}
-  - Config:
-      Name: AcceptPC
-      Value: 0
-      Default: 1
-    UI: {fileID: 536174446}
-  - Config:
-      Name: AcceptMobile
-      Value: 0
-      Default: 1
-    UI: {fileID: 2064150710}
+  UI_ConfigBools: []
   UI_ConfigInts:
   - Config:
       Name: Port
@@ -12362,7 +12347,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2064150709
 RectTransform:
   m_ObjectHideFlags: 0
