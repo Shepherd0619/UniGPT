@@ -182,7 +182,15 @@ public class LoginWindow : MonoBehaviour
                 });
 
             }
-            GPTNetworkManager.singleton.StartHost();
+
+            try
+            {
+                GPTNetworkManager.singleton.StartHost();
+            }
+            catch (Exception e)
+            {
+                MsgBoxManager.Instance.ShowMsgBox("Unable to start host.\n"+e.Message, false);
+            }
         }, null, true);
         //GPTNetworkManager.singleton.StartHost();
     }

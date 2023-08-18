@@ -104,8 +104,7 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
         AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "You can type <b>/help</b> to see available commands.");
         LocalPlayerAvatar.texture = new Texture2D(1, 1);
         ImageConversion.LoadImage((Texture2D)LocalPlayerAvatar.texture, LocalPlayerInfo.Avatar.ToArray());
-        Reset();
-        RequestFullChatLog(NetworkClient.localPlayer.GetComponent<GPTPlayer>());
+        Reset();        
     }
 
     public override void OnStopClient()
