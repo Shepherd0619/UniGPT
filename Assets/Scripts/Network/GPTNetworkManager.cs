@@ -90,9 +90,7 @@ public class GPTNetworkManager : NetworkManager
     public override void Start()
     {
         base.Start();
-#if !UNITY_SERVER
-        LoginWindow.Instance.ShowSplashScreen();
-#elif UNITY_SERVER
+#if UNITY_SERVER
         HostWindow.Instance.Server_LoadAndApplySettings();
         StartServer();
         Debug.Log("[GPTNetworkManager]Server mode started!");

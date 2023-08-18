@@ -15,16 +15,6 @@ public class MsgBoxManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        StartCoroutine(LoadAsset());
-    }
-
-    IEnumerator LoadAsset()
-    {
-        Debug.Log("[MsgBoxManager]Start loading asset.");
-        handle = Addressables.LoadAssetAsync<GameObject>("MessageBox");
-        yield return handle;
-        Debug.Log("[MsgBoxManager]Addressable loaded.");
-        Prefab = handle.Result;
     }
 
     private void OnDestroy()

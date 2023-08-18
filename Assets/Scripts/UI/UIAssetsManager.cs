@@ -11,6 +11,7 @@ public class UIAssetsManager : MonoBehaviour
     public List<ImageSet> Icons;
     public List<ImageSet> Backgrounds;
     public List<ImageSet> Emojis;
+    public List<GameObject> Windows;
     [System.Serializable]
     public class ImageSet
     {
@@ -29,10 +30,10 @@ public class UIAssetsManager : MonoBehaviour
 
     IEnumerator LoadAssets()
     {
-        Debug.Log("[UIAssetsManager]Start loading Addressable.");
-        AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync("UI/Icon");
-        yield return handle;
-        if(handle.Status == AsyncOperationStatus.Failed)
+        Debug.Log("[UIAssetsManager]Start loading Icon Addressable.");
+        AsyncOperationHandle<IList<IResourceLocation>> IconHandle = Addressables.LoadResourceLocationsAsync("UI/Icon");
+        yield return IconHandle;
+        if(IconHandle.Status == AsyncOperationStatus.Failed || IconHandle.Result.Count == 0)
         {
             MsgBoxManager.Instance.ShowMsgBox("Failed to load resources. Please verify the installation.\nIf this is the first time you encountered such issue, please click Confirm.\nIf not, please click Cancel to quit and reinstall the app.",true, (result) =>
             {
@@ -45,12 +46,11 @@ public class UIAssetsManager : MonoBehaviour
                     Application.Quit();
                 }
             });
-
         }
 
-        Debug.Log("[UIAssetsManager]Addressable loaded.");
+        Debug.Log("[UIAssetsManager]Icon Addressable loaded.");
         Icons.Clear();
-        foreach (IResourceLocation search in handle.Result)
+        foreach (IResourceLocation search in IconHandle.Result)
         {
             if (Icons.Find(x => x.Name == search.PrimaryKey) == null)
             {
@@ -65,14 +65,43 @@ public class UIAssetsManager : MonoBehaviour
                 });
             }
         }
-        Addressables.Release(handle);
+        Addressables.Release(IconHandle);
 
-        //TODO: 加载其他类型的UI资源
-        Debug.Log("[ChatWindow]Start loading asset.");
-        AsyncOperationHandle<GameObject> ChatMessagePrefabHandle = Addressables.LoadAssetAsync<GameObject>("MessageUI");
-        yield return ChatMessagePrefabHandle;
-        Debug.Log("[ChatWindow]Addressable loaded.");
-        ChatWindow.Instance.ChatMessagePrefab = ChatMessagePrefabHandle.Result;
+        Debug.Log("[UIAssetsManager]Start loading Window Addressable.");
+        AsyncOperationHandle<IList<IResourceLocation>> WindowHandle = Addressables.LoadResourceLocationsAsync("UI/Window");
+        yield return WindowHandle;
+        if (WindowHandle.Status == AsyncOperationStatus.Failed || WindowHandle.Result.Count == 0)
+        {
+            MsgBoxManager.Instance.ShowMsgBox("Failed to load resources. Please verify the installation.\nIf this is the first time you encountered such issue, please click Confirm.\nIf not, please click Cancel to quit and reinstall the app.", true, (result) =>
+            {
+                if (result)
+                {
+                    StartCoroutine(LoadAssets());
+                }
+                else
+                {
+                    Application.Quit();
+                }
+            });
+        }
+
+        Debug.Log("[UIAssetsManager]Window Addressable loaded.");
+        Windows.Clear();
+        foreach (IResourceLocation search in WindowHandle.Result)
+        {
+            if (Windows.Find(x => x.name == search.PrimaryKey) == null)
+            {
+                AsyncOperationHandle<GameObject> win = Addressables.LoadAssetAsync<GameObject>(search.PrimaryKey);
+                yield return win;
+                Debug.Log("[UIAssetsManager]" + search.PrimaryKey + " loaded.");
+                Windows.Add(win.Result);
+            }
+        }
+
+#if !UNITY_SERVER
+        LoginWindow.Instance.ShowSplashScreen();
+#endif
+
     }
 
     // Start is called before the first frame update

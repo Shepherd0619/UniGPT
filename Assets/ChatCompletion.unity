@@ -3495,7 +3495,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b4bb8f2857dbf24680ef269e8945d4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Prefab: {fileID: 0}
+  Prefab: {fileID: 6970305697199705451, guid: 208fa943f8cc5514ead65fef7436febc, type: 3}
   MsgBoxes: []
 --- !u!4 &639842336
 Transform:
@@ -7336,6 +7336,7 @@ MonoBehaviour:
   Icons: []
   Backgrounds: []
   Emojis: []
+  Windows: []
 --- !u!4 &1136516959
 Transform:
   m_ObjectHideFlags: 0

@@ -20,11 +20,13 @@ MonoBehaviour:
   - m_GUID: 3b4082d9b167fb44584c01d3b9c32ff0
     m_Address: MessageUI
     m_ReadOnly: 0
-    m_SerializedLabels: []
-  - m_GUID: 208fa943f8cc5514ead65fef7436febc
-    m_Address: MessageBox
+    m_SerializedLabels:
+    - UI/Window
+  - m_GUID: e55a32b4b820abe4591bc814e0b65470
+    m_Address: ContextMenu
     m_ReadOnly: 0
-    m_SerializedLabels: []
+    m_SerializedLabels:
+    - UI/Window
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: d54ceed1de5bec94bbba025544af595d, type: 2}
   m_SchemaSet:

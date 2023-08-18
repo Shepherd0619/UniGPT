@@ -531,7 +531,7 @@ MonoBehaviour:
   Message: 
   TextRectTransform: {fileID: 8131048188809429917}
   messageText: {fileID: 4928629862287326341}
-  menuUI: {fileID: 8175068088035195245, guid: e55a32b4b820abe4591bc814e0b65470, type: 3}
+  menuUI: {fileID: 0}
 --- !u!114 &7705517954672244186
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -556,4 +556,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a592156fd4c5b5c46a186a15b6a55874, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  menuUI: {fileID: 8175068088035195245, guid: e55a32b4b820abe4591bc814e0b65470, type: 3}
+  CopyBtn: {fileID: 0}
+  PasteBtn: {fileID: 0}
+  ShareBtn: {fileID: 0}

@@ -130,12 +130,14 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
 
     public void AppendMessage(string sender, byte[] avatar, string content)
     {
+        if (ChatMessagePrefab == null)
+            ChatMessagePrefab = UIAssetsManager.Instance.Windows.First((search) => search.name == "MessageUI");
+
         GameObject obj = Instantiate(ChatMessagePrefab, ChatContainer.content);
         MessageUI msg = obj.GetComponent<MessageUI>();
 
         //更新信息框UI
         msg.AppendMessage(sender, avatar, content);
-
         if (!isDragging)
             StartCoroutine(ScrollToLatestMessage());
     }

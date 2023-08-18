@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -124,6 +125,12 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
         {
             Destroy(realtimeMenuUI);
         }
+
+        if(menuUI == null)
+        {
+            menuUI = UIAssetsManager.Instance.Windows.First((search) => search.name == "ContextMenu");
+        }
+
         realtimeMenuUI = Instantiate(menuUI, transform);
         realtimeMenuUI.transform.position = position;
         // 显示右键菜单
