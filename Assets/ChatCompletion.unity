@@ -4949,8 +4949,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 618336553}
   m_HandleRect: {fileID: 618336552}
   m_Direction: 2
-  m_Value: 1
-  m_Size: 0.999995
+  m_Value: 0
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7464,24 +7464,7 @@ MonoBehaviour:
 
     Please
     do not share the key around because the key is the only authentication to perform
-    the calling of OpenAI function.
-
-    If you did it, other people can use that
-    key to serve themselves.
-
-
-    If the key is already exposed to the public, please
-    destroy the key on OpenAI platform immediately.
-
-
-    We recommend to set the
-    key before server boot up. Modify the key when server is running may cause the
-    client cannot retreive their response.
-
-
-    And ofc, we as developer won''t
-    store your key. All info will be stored in your device and won''t be transfered
-    to anyone.'
+    the calling of OpenAI function.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

@@ -12,10 +12,11 @@ public class TextContextMenu : MonoBehaviour
     private bool isReadOnly = false;
     public static TextContextMenu Instance;
 
-    public void Initialize(TMP_Text _Text)
+    public void Initialize(TMP_Text _Text, bool ReadOnly = true)
     {
         Instance = this;
         ui_text = _Text;
+        isReadOnly = ReadOnly;
 #if UNITY_ANDROID || UNITY_IOS
         ShareBtn.gameObject.SetActive(true);
 #else
