@@ -10,16 +10,10 @@ public class MsgBoxManager : MonoBehaviour
     public GameObject Prefab;
     public List<MsgBox> MsgBoxes;
     public static MsgBoxManager Instance;
-    AsyncOperationHandle<GameObject> handle;
 
     private void Awake()
     {
         Instance = this;
-    }
-
-    private void OnDestroy()
-    {
-        Addressables.Release(handle);
     }
 
     // Start is called before the first frame update
