@@ -39,6 +39,7 @@ public class GPTNetworkManager : NetworkManager
     #region 自助指令
     public void RegisterSelfHelpCommands()
     {
+        SelfHelpCommands.Clear();
         //注册系统内置指令
         SelfHelpCommands.Add(new SelfHelpCommand()
         {
