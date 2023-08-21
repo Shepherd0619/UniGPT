@@ -1,12 +1,14 @@
 # UniGPT
 A ChatGPT live chat application powered by Unity Engine.
 
+
 # FAQ
 - Q: What is UniGPT?
 
-A: UniGPT is a **self-hosted** solution for sharing OpenAI API access **without directly sharing the API Key.**
-It is also a solution for gamedev (especially sim direction) to **embed the ChatGPT into their NPCs and stories.**
+	A: UniGPT is a **self-hosted** solution for sharing OpenAI API access **without directly sharing the API Key.**
+	It is also a solution for gamedev (especially sim direction) to **embed the ChatGPT into their NPCs and stories.**
 
+	In the future, it will also assist any Unity game developers with code analysis, prefab management and team collaboration.
 
 
 - Q: Is UniGPT another Discord-like or Siri-like app?
