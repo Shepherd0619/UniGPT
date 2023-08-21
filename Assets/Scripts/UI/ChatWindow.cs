@@ -311,6 +311,27 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
         //        AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar,msg.content);
         //    }
 
+        //改用协程以避免卡顿
+
+        //AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "<b>--- MESSAGE(S) FROM CHAT LOG ---</b>");
+        //for (int i = 1; i < result.Count; i++)
+        //{
+        //    if (result[i].role.Equals("system", StringComparison.OrdinalIgnoreCase))
+        //    {
+        //        AppendMessage("ChatGPT", UIAssetsManager.Instance.GetIcon2Texture("chatgpt_icon").EncodeToPNG(), result[i].content);
+        //    }
+        //    else
+        //    {
+        //        AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar, result[i].content);
+        //    }
+        //}
+        //AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "<b>--- END OF CHAT LOG ---</b>");
+
+        StartCoroutine(OnPrintMultipleMessages(result));
+    }
+
+    IEnumerator OnPrintMultipleMessages(List<ChatMessage> result)
+    {
         AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "<b>--- MESSAGE(S) FROM CHAT LOG ---</b>");
         for (int i = 1; i < result.Count; i++)
         {
@@ -324,6 +345,7 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
             }
         }
         AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "<b>--- END OF CHAT LOG ---</b>");
+        yield return null;
     }
 
     [Command(requiresAuthority = false)]
