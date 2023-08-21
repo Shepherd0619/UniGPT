@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Text.RegularExpressions;
 
 public class TextContextMenu : MonoBehaviour
 {
@@ -44,7 +45,7 @@ public class TextContextMenu : MonoBehaviour
 
     public virtual void CopyText()
     {
-        GUIUtility.systemCopyBuffer = ui_text.text;
+        GUIUtility.systemCopyBuffer = Regex.Replace(ui_text.text, @"<.*?>", string.Empty);
 
         SelfDestruction();
     }
@@ -62,7 +63,7 @@ public class TextContextMenu : MonoBehaviour
 #if UNITY_ANDROID || UNITY_IOS
         NativeShare share = new NativeShare();
         share.Clear();
-        share.SetText(ui_text.text + "\n--- Message from UniGPT which was developed by Shepherd0619.\nFor more info, please visit https://shepherd0619.github.io/.");
+        share.SetText(Regex.Replace(ui_text.text, @"<.*?>", string.Empty) + "\n--- Message from UniGPT which was developed by Shepherd0619.\nFor more info, please visit https://shepherd0619.github.io/.");
         share.SetUrl("https://shepherd0619.github.io/");
         share.Share();
 #endif
