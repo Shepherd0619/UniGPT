@@ -49,11 +49,12 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
     {
         if (!String.IsNullOrWhiteSpace(MessageInputField.text) && MessageInputField.interactable)
         {
+            string text = MessageInputField.text.Trim();
             //检测用户是否输入的是指令
-            if (MessageInputField.text.StartsWith("/"))
+            if (text.StartsWith("/"))
             {
                 Debug.Log("[ChatWindow]Self-help command detected! Command:" + MessageInputField.text);
-                string command = MessageInputField.text.Substring(1).TrimEnd('\n'); // 去掉首个斜杠字符和末尾的换行符
+                string command = text.Substring(1).TrimEnd('\n'); // 去掉首个斜杠字符和末尾的换行符
                 string[] parts = command.Split(' ');
                 string commandName = parts[0];
                 string[] arguments = parts.Skip(1).ToArray();
@@ -70,12 +71,12 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
                     Avatar = LocalPlayerInfo.Avatar.ToArray()
                 },
 
-                content = MessageInputField.text.TrimEnd('\n')//去掉末尾的换行符
+                content = MessageInputField.text.Trim().TrimEnd('\n')//去掉末尾的换行符
             });
             MessageInputField.interactable = false;
             SendMessageBtn.interactable = false;
             ChatGPTProcessingIndicator.SetActive(true);
-            AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar.ToArray(), MessageInputField.text);
+            AppendMessage(LocalPlayerInfo.Username, LocalPlayerInfo.Avatar.ToArray(), MessageInputField.text.Trim());
         }
     }
 

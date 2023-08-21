@@ -205,7 +205,7 @@ public class LoginWindow : MonoBehaviour
     {
         ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).ClientInfo = new GPTNetworkAuthenticator.AuthRequestMessage()
         {
-            Username = Username.text,
+            Username = Username.text.Trim(),
             Avatar = Avatar.texture ? ImageConversion.EncodeToPNG((Texture2D)Avatar.texture) : ImageConversion.EncodeToPNG(UIAssetsManager.Instance.GetIcon2Texture("default-avatar")),
             UserRole = isAdmin ? GPTNetworkAuthenticator.AuthRequestMessage.Role.Admin : GPTNetworkAuthenticator.AuthRequestMessage.Role.User
         };
