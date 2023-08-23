@@ -293,6 +293,8 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
             else
             {
                 Debug.Log("[ChatWindow]Looks like there is no chat log of " + applicant.Username + ".");
+                OnReceiveServerTargetedMessage(((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key, 
+                    new GPTChatMessage() { content = "Looks like there is no chat log exist. Please enjoy a brand new chat!" });
             }
         }
     }
