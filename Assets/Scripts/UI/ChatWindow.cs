@@ -130,6 +130,11 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
 
     public void AppendMessage(string sender, byte[] avatar, string content)
     {
+        StartCoroutine(AppendMessage_Async(sender, avatar, content));
+    }
+
+    IEnumerator AppendMessage_Async(string sender, byte[] avatar, string content)
+    {
         if (ChatMessagePrefab == null)
             ChatMessagePrefab = UIAssetsManager.Instance.Windows.First((search) => search.name == "MessageUI");
 
@@ -140,6 +145,8 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
         msg.AppendMessage(sender, avatar, content);
         if (!isDragging)
             StartCoroutine(ScrollToLatestMessage());
+
+        yield return null;
     }
 
     IEnumerator ScrollToLatestMessage()
