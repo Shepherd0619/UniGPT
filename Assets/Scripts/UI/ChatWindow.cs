@@ -39,7 +39,7 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Return) && (!Input.GetKeyDown(KeyCode.LeftShift)||!Input.GetKeyDown(KeyCode.RightShift)))
+        if (Input.GetKeyDown(KeyCode.Return))
         {
             UI_SendMessageToServer();
         }
