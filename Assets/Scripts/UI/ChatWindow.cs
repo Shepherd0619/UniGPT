@@ -90,8 +90,12 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
                 NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key;
                 if (conn != null)
                     obj.Executation.Invoke(param, conn);
+                return;
             }
         }
+
+        OnReceiveServerTargetedMessage(((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key,
+                    new GPTChatMessage() { content = "Unrecognized or unavailable command. Type /help to see available commands." });
     }
 
     public override void OnStartClient()
