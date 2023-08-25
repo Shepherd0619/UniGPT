@@ -13,6 +13,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
     //public ScrollRect messageScroll;
     public RectTransform TextRectTransform;
     public TMP_Text messageText;
+    public string orgText;
     private RectTransform rectTransform;
     private RectTransform scrollTransform;
     private Vector2 orgSize;
@@ -58,6 +59,8 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
         ImageConversion.LoadImage((Texture2D)Avatar.texture, avatar);
         Name = name;
         Message = message;
+
+        orgText = name + "\n" + message;
 
         messageText.text = "<b>" + name + "</b>\n\n" + message;
 
@@ -135,7 +138,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
         realtimeMenuUI.transform.position = position;
         // 显示右键菜单
         realtimeMenuUI.SetActive(true);
-        realtimeMenuUI.GetComponent<TextContextMenu>().Initialize(messageText);
+        realtimeMenuUI.GetComponent<TextContextMenu>().Initialize(this);
     }
 
     private void HideContextMenu()
