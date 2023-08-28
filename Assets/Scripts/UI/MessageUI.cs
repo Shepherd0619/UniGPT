@@ -129,7 +129,7 @@ public class MessageUI : MonoBehaviour, IPointerClickHandler, IPointerDownHandle
             Destroy(realtimeMenuUI);
         }
 
-        if(menuUI == null)
+        if (menuUI == null)
         {
             menuUI = UIAssetsManager.Instance.Windows.First((search) => search.name == "ContextMenu");
         }
