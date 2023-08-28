@@ -301,7 +301,7 @@ public class GPTNetworkManager : NetworkManager
                 NetworkClient.Connect(networkAddress);
                 CurrentReconnectAttemptCounter++;
                 Debug.Log("[GPTNetworkAuthenticatior]Client is now reconnecting. (" + CurrentReconnectAttemptCounter + " of " + MaxReconnectAttempt + ")");
-                msgboxId = MsgBoxManager.Instance.ShowMsgBoxNonInteractable("There is a timeout or dead link in this connection.\nReconnecting to " + GPTNetworkManager.singleton.networkAddress+"......", true, (result) =>
+                msgboxId = MsgBoxManager.Instance.ShowMsgBoxNonInteractable("There is a timeout or dead link in this connection.\nReconnecting to " + GPTNetworkManager.singleton.networkAddress + "......", true, (result) =>
                 {
                     if (!result)
                     {
@@ -320,7 +320,7 @@ public class GPTNetworkManager : NetworkManager
                 else
                 {
                     isReconnecting = false;
-                    MsgBoxManager.Instance.RemoveNonInteractableMsgBox(msgboxId,true);
+                    MsgBoxManager.Instance.RemoveNonInteractableMsgBox(msgboxId, true);
                     Debug.Log("[GPTNetworkAuthenticator]MaxReconnectAttempt reached! Reconnect failed!");
                     CurrentReconnectAttemptCounter = 0;
                     MsgBoxManager.Instance.ShowMsgBox("We are sorry to inform you that we have lost the connection to the server due to <b>ping timeout or dead link</b>.\nWe will send ya back to the login screen.", false, (result) =>

@@ -195,7 +195,7 @@ public class LoginWindow : MonoBehaviour
             }
             catch (Exception e)
             {
-                MsgBoxManager.Instance.ShowMsgBox("Unable to start host.\n"+e.Message, false);
+                MsgBoxManager.Instance.ShowMsgBox("Unable to start host.\n" + e.Message, false);
             }
         }, null, true);
         //GPTNetworkManager.singleton.StartHost();

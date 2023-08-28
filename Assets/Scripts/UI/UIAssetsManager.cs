@@ -33,9 +33,9 @@ public class UIAssetsManager : MonoBehaviour
         Debug.Log("[UIAssetsManager]Start loading Icon Addressable.");
         AsyncOperationHandle<IList<IResourceLocation>> IconHandle = Addressables.LoadResourceLocationsAsync("UI/Icon");
         yield return IconHandle;
-        if(IconHandle.Status == AsyncOperationStatus.Failed || IconHandle.Result.Count == 0)
+        if (IconHandle.Status == AsyncOperationStatus.Failed || IconHandle.Result.Count == 0)
         {
-            MsgBoxManager.Instance.ShowMsgBox("Failed to load resources. Please verify the installation.\nIf this is the first time you encountered such issue, please click Confirm.\nIf not, please click Cancel to quit and reinstall the app.",true, (result) =>
+            MsgBoxManager.Instance.ShowMsgBox("Failed to load resources. Please verify the installation.\nIf this is the first time you encountered such issue, please click Confirm.\nIf not, please click Cancel to quit and reinstall the app.", true, (result) =>
             {
                 if (result)
                 {

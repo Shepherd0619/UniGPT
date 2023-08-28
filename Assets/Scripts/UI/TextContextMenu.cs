@@ -1,7 +1,6 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Text.RegularExpressions;
 
 public class TextContextMenu : MonoBehaviour
 {
@@ -82,7 +81,7 @@ public class TextContextMenu : MonoBehaviour
 
     public virtual void CopyText()
     {
-        if(isPureText)
+        if (isPureText)
             GUIUtility.systemCopyBuffer = ui_text.text;
         else
         {

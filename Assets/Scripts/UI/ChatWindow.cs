@@ -109,7 +109,7 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
         AppendMessage("SYSTEM", UIAssetsManager.Instance.GetIcon2Texture("announcement_icon").EncodeToPNG(), "You can type <b>/help</b> to see available commands.");
         LocalPlayerAvatar.texture = new Texture2D(1, 1);
         ImageConversion.LoadImage((Texture2D)LocalPlayerAvatar.texture, LocalPlayerInfo.Avatar.ToArray());
-        Reset();        
+        Reset();
     }
 
     public override void OnStopClient()
@@ -173,7 +173,7 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if(TextContextMenu.Instance != null)
+            if (TextContextMenu.Instance != null)
             {
                 TextContextMenu.Instance.SelfDestruction();
             }
@@ -297,7 +297,7 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
             else
             {
                 Debug.Log("[ChatWindow]Looks like there is no chat log of " + applicant.Username + ".");
-                OnReceiveServerTargetedMessage(((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key, 
+                OnReceiveServerTargetedMessage(((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == applicant.Username).Key,
                     new GPTChatMessage() { content = "Looks like there is no chat log exist. Please enjoy a brand new chat!" });
             }
         }
