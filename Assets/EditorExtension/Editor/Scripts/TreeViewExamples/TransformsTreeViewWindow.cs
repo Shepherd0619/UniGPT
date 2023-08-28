@@ -1,64 +1,64 @@
-using UnityEngine;
 using UnityEditor.IMGUI.Controls;
+using UnityEngine;
 
 
 namespace UnityEditor.TreeViewExamples
 {
-	
-	class TransformTreeWindow : EditorWindow
-	{
-		[SerializeField] TreeViewState m_TreeViewState;
 
-		TreeView m_TreeView;
+    class TransformTreeWindow : EditorWindow
+    {
+        [SerializeField] TreeViewState m_TreeViewState;
 
-		[MenuItem("TreeView Examples/Transform Hierarchy")]
-		static void ShowWindow()
-		{
-			var window = GetWindow<TransformTreeWindow>();
-			window.titleContent = new GUIContent("My Hierarchy");
-			window.Show();
-		}
+        TreeView m_TreeView;
 
-		void OnEnable ()
-		{
-			if (m_TreeViewState == null)
-				m_TreeViewState = new TreeViewState ();
+        [MenuItem("TreeView Examples/Transform Hierarchy")]
+        static void ShowWindow()
+        {
+            var window = GetWindow<TransformTreeWindow>();
+            window.titleContent = new GUIContent("My Hierarchy");
+            window.Show();
+        }
 
-			m_TreeView = new TransformTreeView (m_TreeViewState);
-		}
+        void OnEnable()
+        {
+            if (m_TreeViewState == null)
+                m_TreeViewState = new TreeViewState();
 
-		void OnSelectionChange ()
-		{
-			if (m_TreeView != null)
-				m_TreeView.SetSelection (Selection.instanceIDs);
-			Repaint ();
-		}
+            m_TreeView = new TransformTreeView(m_TreeViewState);
+        }
 
-		void OnHierarchyChange()
-		{
-			if (m_TreeView != null)
-				m_TreeView.Reload();
-			Repaint ();
-		}
+        void OnSelectionChange()
+        {
+            if (m_TreeView != null)
+                m_TreeView.SetSelection(Selection.instanceIDs);
+            Repaint();
+        }
 
-		void OnGUI ()
-		{
-			DoToolbar ();
-			DoTreeView ();
-			
-		}
-		
-		void DoTreeView ()
-		{
-			Rect rect = GUILayoutUtility.GetRect (0, 100000, 0, 100000);
-			m_TreeView.OnGUI(rect);
-		}
+        void OnHierarchyChange()
+        {
+            if (m_TreeView != null)
+                m_TreeView.Reload();
+            Repaint();
+        }
 
-		void DoToolbar()
-		{
-			GUILayout.BeginHorizontal(EditorStyles.toolbar);
-			GUILayout.FlexibleSpace ();
-			GUILayout.EndHorizontal();
-		}
-	}
+        void OnGUI()
+        {
+            DoToolbar();
+            DoTreeView();
+
+        }
+
+        void DoTreeView()
+        {
+            Rect rect = GUILayoutUtility.GetRect(0, 100000, 0, 100000);
+            m_TreeView.OnGUI(rect);
+        }
+
+        void DoToolbar()
+        {
+            GUILayout.BeginHorizontal(EditorStyles.toolbar);
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        }
+    }
 }
