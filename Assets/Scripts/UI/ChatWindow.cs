@@ -51,7 +51,7 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
         {
             string text = MessageInputField.text.Trim();
             //检测用户是否输入的是指令
-            if (text.StartsWith("/"))
+            if (text.StartsWith("/") && text.Substring(1) != "/")
             {
                 Debug.Log("[ChatWindow]Self-help command detected! Command:" + MessageInputField.text);
                 string command = text.Substring(1).TrimEnd('\n'); // 去掉首个斜杠字符和末尾的换行符
