@@ -59,7 +59,7 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
                 string commandName = parts[0];
                 string[] arguments = parts.Skip(1).ToArray();
                 SendSelfHelpCommand(NetworkClient.localPlayer.GetComponent<GPTPlayer>(), commandName, arguments);
-                Reset();
+                MessageInputField.text = null;
                 return;
             }
 
@@ -268,6 +268,26 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
         }
 
 
+    }
+
+    [Command(requiresAuthority = false)]
+    public void ResendMessageToChatGPT(GPTPlayer player)
+    {
+        NetworkConnection conn = ((GPTNetworkAuthenticator)GPTNetworkManager.singleton.authenticator).UsersList.First(x => x.Value.Username == player.Username).Key;
+        if (conn == null)
+            return;
+        try
+        {
+            //TODO: 这里应该给出一个将ChatGPT聊天记录保存在本地的选项
+            ChatCompletion.ChatRequestLog result = ChatCompletion.Instance.chatRequestLogs.FirstOrDefault(x => (x.sender == player.Username));
+            ChatCompletion.Instance.chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(result.history, null, conn));
+            Debug.Log("ChatRquestLog Found");
+        }
+        catch
+        {
+            ChatCompletion.Instance.chatRequestLogs.Add(new ChatCompletion.ChatRequestLog() { history = new List<ChatMessage>(), sender = player.Username });
+            ChatCompletion.Instance.chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(null, null, conn));
+        }
     }
 
     [Command(requiresAuthority = false)]

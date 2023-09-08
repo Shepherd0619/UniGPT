@@ -28,7 +28,10 @@ public class ChatCompletion : MonoBehaviour
     {
         //TODO:后续需要改进一下这个函数，让服务器找记录
         if (history != null && history.Count > 0)
-            history.Add(new ChatMessage() { role = "user", content = msg });
+        {
+            if(!string.IsNullOrWhiteSpace(msg))
+                history.Add(new ChatMessage() { role = "user", content = msg });
+        }
         else
         {
             history = new List<ChatMessage>
@@ -154,7 +157,7 @@ public class ChatCompletion : MonoBehaviour
 
     public void ChatRequestResponseErrorCallback(NetworkConnection conn, string errorMsg)
     {
-        ChatWindow.Instance.OnReceiveChatGPTMessage(conn, "Error sending chat request: " + errorMsg);
+        ChatWindow.Instance.OnReceiveChatGPTMessage(conn, "Error sending chat request: " + errorMsg + "\nYou can type <b>/Resend</b> to try again.");
     }
 
     public string GetFullChatLog(string username)
