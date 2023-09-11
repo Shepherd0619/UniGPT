@@ -76,6 +76,19 @@ public class GPTNetworkManager : NetworkManager
             },
             Summary = "Clear current user's chat log. (WARNING: Cannot be undone.) "
         });
+
+        SelfHelpCommands.Add(new SelfHelpCommand()
+        {
+            Command = "Resend",
+            Executation = (args, conn) =>
+            {
+                ChatWindow.Instance.ResendMessageToChatGPT(conn.identity.GetComponent<GPTPlayer>());
+                ChatWindow.Instance.MessageInputField.interactable = false;
+                ChatWindow.Instance.SendMessageBtn.interactable = false;
+                ChatWindow.Instance.ChatGPTProcessingIndicator.SetActive(true);
+            },
+            Summary = "Resend messages to ChatGPT."
+        });
     }
     #endregion
 
