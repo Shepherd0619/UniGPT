@@ -278,15 +278,21 @@ public class ChatWindow : NetworkBehaviour, IPointerDownHandler
             return;
         try
         {
-            //TODO: 这里应该给出一个将ChatGPT聊天记录保存在本地的选项
             ChatCompletion.ChatRequestLog result = ChatCompletion.Instance.chatRequestLogs.FirstOrDefault(x => (x.sender == player.Username));
+            if (result.history == null || result.history.Count <= 0)
+            {
+                OnReceiveServerTargetedMessage(player.netIdentity.connectionToClient, new GPTChatMessage()
+                {
+                    content = "Unable to resend because there is no message/chat log here."
+                });
+                return;
+            }
             ChatCompletion.Instance.chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(result.history, null, conn));
             Debug.Log("ChatRquestLog Found");
         }
         catch
         {
-            ChatCompletion.Instance.chatRequestLogs.Add(new ChatCompletion.ChatRequestLog() { history = new List<ChatMessage>(), sender = player.Username });
-            ChatCompletion.Instance.chatRequestUnderProcessing.Add(conn, ChatCompletion.Instance.SendChatRequest(null, null, conn));
+            OnReceiveChatGPTMessage(player.netIdentity.connectionToClient, "Unable to resend because there is no message/chat log here.");
         }
     }
 

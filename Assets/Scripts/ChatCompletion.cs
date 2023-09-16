@@ -29,7 +29,7 @@ public class ChatCompletion : MonoBehaviour
         //TODO:后续需要改进一下这个函数，让服务器找记录
         if (history != null && history.Count > 0)
         {
-            if(!string.IsNullOrWhiteSpace(msg))
+            if (!string.IsNullOrWhiteSpace(msg))
                 history.Add(new ChatMessage() { role = "user", content = msg });
         }
         else
@@ -40,6 +40,21 @@ public class ChatCompletion : MonoBehaviour
                 new ChatMessage { role = "user", content = msg }
             };
         }
+
+        try
+        {
+            ChatCompletion.ChatRequestLog x = chatRequestLogs.FirstOrDefault(x => x.sender == ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username);
+            x.history = history;
+        }
+        catch
+        {
+            Debug.LogWarning("[ChatCompletion]Could not find " + ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username + "'s chat log. The user or server may clear it during this request.");
+            chatRequestLogs.Add(new ChatRequestLog(){
+                history = history,
+                sender = ((GPTNetworkAuthenticator.AuthRequestMessage)conn.authenticationData).Username
+            });
+        }
+
         return StartCoroutine(ChatRequestCoroutine(history, conn));
     }
 
